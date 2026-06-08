@@ -29,14 +29,24 @@ class Reporte:
 
 
 class HistorialDeReciclaje:
-    def __init__(self, id_historial):
+    #inyectar la dependencia 'registros' en el constrcutor
+
+    def __init__(self, id_historial, registros= None):
         self.__id_historial = id_historial
+        #si no pasan nada, entonces empieza con una lista vacia
+        self.__registros = registros if registros is not None else []
+
 
     def consultar_historial(self):
-        print("Consultando historial")
+        print(f"Consultando historial {self.__id_historial}")
+        if not self.__registros:
+            print("No hay registros en el historial")
+            return
+        # ahora el metodo ####
+        for registro in self.__registros:
 
-    def filtrar_por_fecha(self, fecha):
-        print(f"Filtrando historial por fecha {fecha}")
+         def filtrar_por_fecha(self, fecha):
+          print(f"Filtrando historial por fecha {fecha}")
 
 
 class Calificacion:
