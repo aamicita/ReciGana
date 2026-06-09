@@ -6,6 +6,18 @@ class Notificacion:
         self.__mensaje = mensaje
         self.__leida = False
 
+    @property
+    def id_notificacion(self):
+        return self.__id_notificacion
+
+    @property
+    def mensaje(self):
+        return self.__mensaje
+
+    @property
+    def leida(self):
+        return self.__leida
+
     def enviar(self):
         print("Notificacion enviada")
 

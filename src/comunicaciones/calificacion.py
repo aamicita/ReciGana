@@ -6,6 +6,18 @@ class Calificacion:
         self.__puntaje = puntaje
         self.__comentario = comentario
 
+    @property
+    def id_calificacion(self):
+        return self.__id_calificacion
+
+    @property
+    def puntaje(self):
+        return self.__puntaje
+
+    @property
+    def comentario(self):
+        return self.__comentario
+
     def registrar_calificacion(self):
         print("Calificacion registrada")
 
