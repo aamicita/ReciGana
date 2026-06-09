@@ -96,6 +96,26 @@ class Negociacion:
         self.__fecha_inicio = fecha_inicio
         self.__fecha_cierre = fecha_cierre
 
+    @property
+    def id_negociacion(self):
+        return self.__id_negociacion
+
+    @property
+    def precio_final(self):
+        return self.__precio_final
+
+    @property
+    def estado(self):
+        return self.__estado
+
+    @property
+    def fecha_inicio(self):
+        return self.__fecha_inicio
+
+    @property
+    def fecha_cierre(self):
+        return self.__fecha_cierre
+
     def iniciar_negociacion(self):
         self.__estado = "iniciada"
         print("Negociacion iniciada")
