@@ -1,16 +1,39 @@
 # Clase base de usuarios (herencia y encapsulamiento)
 
+import hashlib
+import re
+
+
 class Usuarios:
-    # Encapsulamiento: atributos privados con __
-    def __init__(self, id_usuario, nombre, telefono, correo, contrasenia):
+    """
+    Clase base para todos los usuarios del sistema ReciGana.
+    Representa a cualquier persona registrada en la plataforma.
+    """
+
+    ROLES_VALIDOS = {"ciudadano", "administrador"}
+
+    def __init__(self, id_usuario, nombre, telefono, correo, contrasenia, rol="ciudadano"):
         self.__id = id_usuario
         self.__nombre = nombre
         self.__telefono = telefono
         self.__correo = correo
-        self.__contrasenia = contrasenia
-        self._sesion_activa = False  # protegido
+        self.__contrasenia = self.__encriptar(contrasenia)
+        self.__rol = rol if rol in self.ROLES_VALIDOS else "ciudadano"
+        self._sesion_activa = False
 
-    # Propiedades con @property y @setter
+    # ---------- Encriptación ----------
+
+    @staticmethod
+    def __encriptar(contrasenia):
+        """Convierte la contraseña en un hash SHA-256 para no guardarla en texto plano."""
+        return hashlib.sha256(contrasenia.encode()).hexdigest()
+
+    def verificar_contrasenia(self, contrasenia):
+        """Verifica si la contraseña ingresada es correcta."""
+        return self.__contrasenia == self.__encriptar(contrasenia)
+
+    # ---------- Propiedades ----------
+
     @property
     def id(self):
         return self.__id
@@ -21,8 +44,10 @@ class Usuarios:
 
     @nombre.setter
     def nombre(self, valor):
-        if valor:
-            self.__nombre = valor
+        if isinstance(valor, str) and len(valor.strip()) >= 2:
+            self.__nombre = valor.strip()
+        else:
+            raise ValueError("El nombre debe tener al menos 2 caracteres.")
 
     @property
     def telefono(self):
@@ -30,8 +55,10 @@ class Usuarios:
 
     @telefono.setter
     def telefono(self, valor):
-        if valor:
-            self.__telefono = valor
+        if isinstance(valor, str) and valor.strip().isdigit() and len(valor.strip()) >= 7:
+            self.__telefono = valor.strip()
+        else:
+            raise ValueError("El teléfono debe contener solo dígitos y tener al menos 7 caracteres.")
 
     @property
     def correo(self):
@@ -39,22 +66,39 @@ class Usuarios:
 
     @correo.setter
     def correo(self, valor):
-        if valor and "@" in valor:
-            self.__correo = valor
+        patron = r'^[\w\.-]+@[\w\.-]+\.\w{2,}$'
+        if isinstance(valor, str) and re.match(patron, valor):
+            self.__correo = valor.lower()
+        else:
+            raise ValueError("El correo no tiene un formato válido.")
 
     @property
-    def contrasenia(self):
-        return self.__contrasenia
+    def rol(self):
+        return self.__rol
 
-    @contrasenia.setter
-    def contrasenia(self, valor):
-        if valor and len(valor) >= 4:
-            self.__contrasenia = valor
+    @property
+    def sesion_activa(self):
+        return self._sesion_activa
 
-    def iniciar_sesion(self):
-        self._sesion_activa = True
-        print(f"Sesion iniciada para {self.__nombre}")
+    # ---------- Métodos ----------
+
+    def iniciar_sesion(self, contrasenia):
+        """Inicia sesión verificando la contraseña."""
+        if self.verificar_contrasenia(contrasenia):
+            self._sesion_activa = True
+            return True
+        return False
 
     def cerrar_sesion(self):
+        """Cierra la sesión activa del usuario."""
         self._sesion_activa = False
-        print(f"Sesion cerrada para {self.__nombre}")
+
+    def es_administrador(self):
+        """Retorna True si el usuario tiene rol de administrador."""
+        return self.__rol == "administrador"
+
+    def __str__(self):
+        return f"[{self.__rol.upper()}] {self.__nombre} ({self.__correo})"
+
+    def __repr__(self):
+        return f"Usuarios(id={self.__id}, nombre={self.__nombre}, rol={self.__rol})"
