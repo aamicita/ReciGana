@@ -1,6 +1,8 @@
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+from comunicaciones.notificacion import Notificacion
 from comunicaciones.calificacion import Calificacion
 
 # Tests de Notificacion
