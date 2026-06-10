@@ -23,6 +23,12 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install dependencies
+        run: pip install pytest pytest-cov
+
+      - name: Run tests with coverage
+        run: pytest --cov=src --cov-report=xml
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
