@@ -1,7 +1,6 @@
 import sys
-sys.path.insert(0, 'C:/Users/MEGAMAXI/Desktop/ReciGana/src')
-
-from materiales.negociacion import Negociacion
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 from materiales.material_reciclable import MaterialReciclable
 from materiales.oferta_de_venta import OfertaDeVenta
 

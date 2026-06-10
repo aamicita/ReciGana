@@ -1,7 +1,6 @@
 import sys
-sys.path.insert(0, 'C:/Users/MEGAMAXI/Desktop/ReciGana/src')
-
-from comunicaciones.notificacion import Notificacion
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 from comunicaciones.calificacion import Calificacion
 
 # Tests de Notificacion
