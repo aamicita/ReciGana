@@ -1,133 +1,101 @@
-# Herencia: Ciudadano hereda de Usuarios
-from .usuario import Usuarios
+# Clases de comunicacion y reportes
 
-
-class Ciudadano(Usuarios):
-    """
-    Representa a un ciudadano de Manta registrado en ReciGana.
-    Es el usuario que publica materiales reciclables para la venta.
-    Hereda autenticación y datos básicos de la clase Usuarios.
-    """
-
-    def __init__(self, id_usuario, nombre, telefono, correo, contrasenia, direccion):
-        # Llamamos al constructor de la clase padre para inicializar
-        # id, nombre, teléfono, correo, contraseña y rol
-        super().__init__(id_usuario, nombre, telefono, correo, contrasenia, rol="ciudadano")
-
-        # Atributo propio del ciudadano: su dirección física en Manta
-        self.__direccion = direccion
-
-        # Lista interna de materiales publicados por este ciudadano
-        self.__materiales_publicados = []
-
-        # Lista interna de ofertas recibidas sobre sus materiales
-        self.__ofertas_recibidas = []
-
-    # ---------- Propiedades ----------
+class Notificacion:
+    def __init__(self, id_notificacion, mensaje):
+        self.__id_notificacion = id_notificacion
+        self.__mensaje = mensaje
+        self.__leida = False
 
     @property
-    def direccion(self):
-        """Retorna la dirección del ciudadano."""
-        return self.__direccion
-
-    @direccion.setter
-    def direccion(self, valor):
-        """Actualiza la dirección solo si el valor no está vacío."""
-        if isinstance(valor, str) and len(valor.strip()) >= 5:
-            self.__direccion = valor.strip()
-        else:
-            raise ValueError("La dirección debe tener al menos 5 caracteres.")
+    def id_notificacion(self):
+        return self.__id_notificacion
 
     @property
-    def materiales_publicados(self):
-        """Retorna una copia de la lista de materiales publicados."""
-        return list(self.__materiales_publicados)
+    def mensaje(self):
+        return self.__mensaje
 
     @property
-    def ofertas_recibidas(self):
-        """Retorna una copia de la lista de ofertas recibidas."""
-        return list(self.__ofertas_recibidas)
+    def leida(self):
+        return self.__leida
 
-    # ---------- Métodos ----------
+    def enviar(self):
+        print("Notificacion enviada")
 
-    def registrar(self):
-        """
-        Confirma que el ciudadano fue registrado correctamente en el sistema.
-        Retorna True para indicar éxito.
-        """
-        print(f"Ciudadano '{self.nombre}' registrado exitosamente en ReciGana.")
-        return True
+    def marcar_como_leida(self):
+        self.__leida = True
+        print("Notificacion marcada como leida")
 
-    def publicar_material(self, tipo, peso, foto=None):
-        """
-        Publica un material reciclable en la plataforma.
-        Parámetros:
-            tipo  -- tipo de material (ej: 'plástico', 'cartón')
-            peso  -- peso en kg del material
-            foto  -- ruta o nombre de la foto (opcional)
-        Retorna el diccionario del material publicado.
-        """
-        # Validamos que el tipo no esté vacío y el peso sea positivo
-        if not tipo or not isinstance(tipo, str):
-            raise ValueError("El tipo de material no puede estar vacío.")
-        if not isinstance(peso, (int, float)) or peso <= 0:
-            raise ValueError("El peso debe ser un número mayor a cero.")
 
-        # Creamos el registro del material como diccionario
-        material = {
-            "tipo": tipo.strip(),
-            "peso_kg": peso,
-            "foto": foto,          # None si no se envió foto
-            "estado": "disponible" # Estado inicial al publicar
-        }
+class Reporte:
+    def __init__(self, id_reporte, fecha, tipo_reporte, contenido):
+        self.__id_reporte = id_reporte
+        self.__fecha = fecha
+        self.__tipo_reporte = tipo_reporte
+        self.__contenido = contenido
 
-        # Lo agregamos a la lista interna del ciudadano
-        self.__materiales_publicados.append(material)
+    @property
+    def id_reporte(self):
+        return self.__id_reporte
 
-        if foto:
-            print(f"Material publicado con foto: {tipo}, {peso} kg")
-        else:
-            print(f"Material publicado: {tipo}, {peso} kg")
+    @property
+    def fecha(self):
+        return self.__fecha
 
-        return material
+    @property
+    def tipo_reporte(self):
+        return self.__tipo_reporte
 
-    def recibir_oferta(self, oferta):
-        """
-        Registra una oferta recibida de un reciclador sobre un material.
-        Parámetro:
-            oferta -- diccionario con los datos de la oferta
-        """
-        self.__ofertas_recibidas.append(oferta)
-        print(f"Nueva oferta recibida: {oferta}")
+    @property
+    def contenido(self):
+        return self.__contenido
 
-    def aceptar_oferta(self, oferta):
-        """
-        Acepta una oferta recibida y marca el material como vendido.
-        Parámetro:
-            oferta -- diccionario con los datos de la oferta a aceptar
-        Retorna True si se aceptó correctamente.
-        """
-        if oferta in self.__ofertas_recibidas:
-            oferta["estado"] = "aceptada"
-            print(f"Oferta aceptada: {oferta}")
-            return True
-        print("La oferta no existe en la lista de ofertas recibidas.")
-        return False
+    def generar_reporte(self):
+        print("Reporte generado")
 
-    def rechazar_oferta(self, oferta):
-        """
-        Rechaza una oferta recibida.
-        Parámetro:
-            oferta -- diccionario con los datos de la oferta a rechazar
-        Retorna True si se rechazó correctamente.
-        """
-        if oferta in self.__ofertas_recibidas:
-            oferta["estado"] = "rechazada"
-            print(f"Oferta rechazada: {oferta}")
-            return True
-        print("La oferta no existe en la lista de ofertas recibidas.")
-        return False
+    def exportar_pdf(self):
+        print("Exportando reporte a PDF")
 
-    def __str__(self):
-        """Representación legible del ciudadano."""
-        return f"Ciudadano: {self.nombre} | Dirección: {self.__direccion} | Materiales publicados: {len(self.__materiales_publicados)}"
+
+class HistorialDeReciclaje:
+    # inyectar la dependencia 'registros' en el constructor
+
+    def __init__(self, id_historial, registros=None):
+        self.__id_historial = id_historial
+        # si no pasan nada, entonces empieza con una lista vacia
+        self.__registros = registros if registros is not None else []
+
+    def consultar_historial(self):
+        print(f"Consultando historial {self.__id_historial}")
+        if not self.__registros:
+            print("No hay registros en el historial")
+            return
+        for _ in self.__registros:  # S1481: variable no usada → reemplazada por _
+            pass
+
+    def filtrar_por_fecha(self, fecha):  # S5603: función movida al nivel correcto de indentación
+        print(f"Filtrando historial por fecha {fecha}")
+
+
+class Calificacion:
+    def __init__(self, id_calificacion, puntaje, comentario):
+        self.__id_calificacion = id_calificacion
+        self.__puntaje = puntaje
+        self.__comentario = comentario
+
+    @property
+    def id_calificacion(self):
+        return self.__id_calificacion
+
+    @property
+    def puntaje(self):
+        return self.__puntaje
+
+    @property
+    def comentario(self):
+        return self.__comentario
+
+    def registrar_calificacion(self):
+        print("Calificacion registrada")
+
+    def consultar_calificaciones(self):
+        print("Consultando calificaciones")
