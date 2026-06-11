@@ -1,6 +1,20 @@
-# Paquete materiales - Módulo de gestión de materiales y ofertas
-from .material_reciclable import MaterialReciclable
-from .oferta_de_venta import OfertaDeVenta
-from .negociacion import Negociacion
+# src/materiales/__init__.py
+from .material_base       import MaterialBase
+from .plastico            import Plastico
+from .vidrio              import Vidrio
+from .metal               import Metal
+from .papel               import Papel
+from .carton              import Carton
+from .organico            import Organico
+from .fabrica_materiales  import FabricaMateriales
 
-__all__ = ["MaterialReciclable", "OfertaDeVenta", "Negociacion"]
+__all__ = [
+    "MaterialBase",
+    "Plastico",
+    "Vidrio",
+    "Metal",
+    "Papel",
+    "Carton",
+    "Organico",
+    "FabricaMateriales",
+]

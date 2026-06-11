@@ -1,0 +1,29 @@
+# materiales/vidrio.py
+from .material_base import MaterialBase
+
+
+class Vidrio(MaterialBase):
+    """
+    Material reciclable: vidrio.
+    Categoría: Reciclable seco.
+    """
+
+    PRECIO_BASE = 0.20
+
+    def get_tipo(self) -> str:
+        return "vidrio"
+
+    def clasificar(self) -> str:
+        categoria = "Reciclable seco"
+        print(f"Material 'vidrio' clasificado como: {categoria}")
+        return categoria
+
+    def calcular_valor(self, precio_por_kg: float = None) -> float:
+        precio = precio_por_kg if precio_por_kg else self.PRECIO_BASE
+
+        if not isinstance(precio, (int, float)) or precio <= 0:
+            raise ValueError("El precio por kg debe ser mayor a cero.")
+
+        valor_total = self.peso * precio
+        print(f"Vidrio: {self.peso} kg × ${precio} = ${valor_total:.2f}")
+        return valor_total
