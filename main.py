@@ -3,15 +3,20 @@ Módulo principal de ReciGana - Sistema de gestión de reciclaje
 Demuestra el flujo completo: registro, publicación, oferta y negociación.
 """
 
-# Importamos las clases de usuarios desde la carpeta src/usuarios
+# Importamos las clases de usuarios
 from src.usuarios import Administrador, Ciudadano, Reciclador
+from src.usuarios import GestorSistema
+from src.usuarios import FabricaUsuariosManta
 
-# Importamos las clases de materiales desde la carpeta src/materiales
-from src.materiales import MaterialReciclable, OfertaDeVenta, Negociacion
+# Importamos las clases de materiales
+from src.materiales import MaterialBase
+from src.materiales.fabrica_materiales import FabricaMateriales
+from src.materiales.oferta_de_venta import OfertaDeVenta
+from src.materiales.negociacion import Negociacion
 
-# Importamos las clases de comunicaciones desde la carpeta src/comunicaciones
+# Importamos las clases de comunicaciones
 from src.comunicaciones import Notificacion, Reporte, HistorialDeReciclaje, Calificacion
-
+from src.comunicaciones import ReporteBuilder
 
 def main():
     """
@@ -88,9 +93,9 @@ def main():
         # ===== PASO 5: CREAR MATERIAL RECICLABLE =====
         print("\n--- Creando material reciclable ---")
 
-        # Creamos un objeto MaterialReciclable con sus características
+        # Creamos un objeto FabricaMateriales con sus características
         # Parámetros: id, tipo, cantidad, peso en kg, estado inicial
-        material = MaterialReciclable("M1", "plastico", 2, 5.0, "disponible")
+        material = FabricaMateriales.crear("plastico", "M1", 2, 5.0)
 
         # Clasificamos el material para saber si es reciclable seco o biodegradable
         material.clasificar()
@@ -209,6 +214,118 @@ def main():
         print("\n" + "=" * 50)
         print("   SISTEMA RECIGANA EJECUTADO EXITOSAMENTE")
         print("=" * 50)
+        
+        # ==== AGG ULTIMAMENTE CLASE PATRONES DE DISEÑO ===
+        
+        
+        # ===== PASO 14: SINGLETON — GestorSistema =====
+        print("\n--- Patrón Singleton: GestorSistema ---")
+
+        # Importamos el GestorSistema aquí para no mezclar con los imports de arriba
+        from src.usuarios import GestorSistema
+
+        # El Singleton garantiza que solo exista UNA instancia del gestor.
+        # Aunque llamemos obtener_instancia() dos veces, siempre
+        # nos devuelve el MISMO objeto con la MISMA lista de datos.
+        # Esto es importante en ReciGana porque si hubiera dos gestores
+        # separados, cada uno tendría su propia lista de usuarios
+        # y los datos estarían desincronizados.
+        gestor1 = GestorSistema.obtener_instancia()
+        gestor2 = GestorSistema.obtener_instancia()
+
+        # Con "is" verificamos que ambas variables apuntan
+        # exactamente al mismo objeto en memoria
+        print(f"¿gestor1 y gestor2 son el mismo objeto? {gestor1 is gestor2}")
+        # Esto debe imprimir: True
+
+        # Registramos a nuestros usuarios en el gestor central
+        gestor1.registrar_usuario(ciudadano)
+        gestor1.registrar_usuario(reciclador)
+
+        # Mostramos el resumen del sistema
+        gestor1.resumen()
+
+
+        # ===== PASO 15: ABSTRACT FACTORY — FabricaUsuariosManta =====
+        print("\n--- Patrón Abstract Factory: FabricaUsuariosManta ---")
+
+        from src.usuarios import FabricaUsuariosManta
+
+        # En vez de crear usuarios directamente escribiendo Ciudadano(...)
+        # usamos la fábrica para que ella se encargue de crearlos.
+        # Ventaja: si ReciGana se expande a Guayaquil, solo creamos
+        # FabricaUsuariosGuayaquil sin tocar el resto del código.
+        fabrica = FabricaUsuariosManta()
+
+        # La fábrica crea cada tipo de usuario correctamente
+        ciudadano2 = fabrica.crear_ciudadano(
+            "C2", "Pedro Mora", "0994567890",
+            "pedro@email.com", "clave789",
+            "Calle Flavio Alfaro"     # Dirección en Manta
+        )
+
+        reciclador2 = fabrica.crear_reciclador(
+            "R2", "Carmen Vera", "0995678901",
+            "carmen@email.com", "clave321",
+            "Los Esteros"             # Zona de cobertura
+        )
+
+        # Mostramos los usuarios creados por la fábrica
+        print(f"Ciudadano creado  : {ciudadano2}")
+        print(f"Reciclador creado : {reciclador2}")
+
+
+        # ===== PASO 16: PROTOTYPE — Notificacion =====
+        print("\n--- Patrón Prototype: Notificacion ---")
+
+        # El Prototype nos permite clonar un objeto ya existente
+        # y cambiarle solo lo que necesitamos.
+        # En ReciGana el mismo mensaje "Tu oferta fue aceptada"
+        # se envía a muchos usuarios. En vez de crear ese objeto
+        # desde cero cada vez, creamos UNO base y lo clonamos
+        # cambiando solo el destinatario.
+
+        # Creamos la notificación base (la "plantilla")
+        notif_base = Notificacion("NOT2", "Tu material fue vendido", "Pedro")
+
+        # Clonamos y solo cambiamos el destinatario
+        # El mensaje sigue siendo el mismo
+        notif_clon = notif_base.clonar(nuevo_destinatario="Carmen")
+
+        # Enviamos ambas notificaciones
+        notif_base.enviar()   # Va dirigida a Pedro
+        notif_clon.enviar()   # Va dirigida a Carmen, mismo mensaje
+
+
+        # ===== PASO 17: BUILDER — ReporteBuilder =====
+        print("\n--- Patrón Builder: ReporteBuilder ---")
+
+        from src.comunicaciones import ReporteBuilder
+
+        # El Builder nos permite construir objetos complejos paso a paso.
+        # En ReciGana un Reporte tiene varios campos: ID, fecha, tipo
+        # y contenido. Con Builder cada paso es claro y si olvidamos
+        # un campo, el Builder nos avisa exactamente cuál falta.
+        # Es como llenar un formulario campo por campo.
+
+        reporte_builder = (ReporteBuilder()
+            # Paso 1: asignamos el ID del reporte
+            .con_id("REP2")
+            # Paso 2: asignamos la fecha del período reportado
+            .con_fecha("2026-05-15")
+            # Paso 3: indicamos el tipo de reporte
+            .con_tipo("usuarios")
+            # Paso 4: agregamos el contenido con datos reales
+            .con_contenido({
+                "total_usuarios" : 2,   # Usuarios registrados
+                "ciudadanos"     : 1,   # Cantidad de ciudadanos
+                "recicladores"   : 1    # Cantidad de recicladores
+            })
+            # Paso final: construimos el objeto Reporte completo
+            .construir())
+
+        # Generamos el reporte para que se muestre en pantalla
+        reporte_builder.generar_reporte()
 
     except Exception as e:
         # Si ocurre cualquier error inesperado lo mostramos y relanzamos

@@ -176,3 +176,43 @@ class TestAdministrador(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+    
+    
+
+# ===== PRUEBA: Abstract Factory - FabricaUsuariosManta =====
+
+# Explicación: En vez de crear Ciudadano, Reciclador y
+# Administrador directamente, usamos la fábrica para
+# que ella se encargue de crearlos correctamente
+
+from src.usuarios import FabricaUsuariosManta
+
+print("\n--- PRUEBA: Abstract Factory - Usuarios ---")
+
+# Creamos la fábrica de usuarios de Manta
+fabrica = FabricaUsuariosManta()
+
+# Le pedimos a la fábrica que cree cada tipo de usuario
+ciudadano = fabrica.crear_ciudadano(
+    1, "María López", "0991234567",
+    "maria@email.com", "clave123", "Av. 4 de Noviembre"
+)
+
+reciclador = fabrica.crear_reciclador(
+    2, "Juan Pérez", "0997654321",
+    "juan@email.com", "clave456", "Manta Centro"
+)
+
+admin = fabrica.crear_administrador(
+    3, "Admin Sistema", "0990000000",
+    "admin@recigana.com", "adminClave"
+)
+
+print(f"Ciudadano  : {ciudadano}")
+print(f"Reciclador : {reciclador}")
+print(f"Admin      : {admin}")
+
+assert ciudadano.nombre == "María López"
+assert reciclador.zona_cobertura == "Manta Centro"
+assert admin.es_administrador() == True
+print(" Abstract Factory Usuarios: OK")
