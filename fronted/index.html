@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReciGana</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>🌱 ReciGana</h1>
+    <p>Sistema de incentivos para el reciclaje</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Registrar usuario</h2>
+      <form id="form-usuario">
+        <input type="text" id="nombre" placeholder="Nombre completo" required>
+        <input type="email" id="email" placeholder="Correo electrónico" required>
+        <input type="text" id="ciudad" placeholder="Ciudad" required>
+        <button type="submit">Registrar</button>
+      </form>
+      <div id="resultado-usuario"></div>
+    </section>
+
+    <section>
+      <h2>Usuarios registrados</h2>
+      <button onclick="cargarUsuarios()">Actualizar lista</button>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Ciudad</th>
+            <th>Puntos</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-tabla"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
