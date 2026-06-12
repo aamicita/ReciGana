@@ -1,3 +1,5 @@
+# __init__ principal del sistema el que maneja casi todo
+
 from .usuarios import Administrador, Ciudadano, Reciclador, Usuarios
 from .usuarios import GestorSistema
 from .usuarios import FabricaUsuariosBase, FabricaUsuariosManta
