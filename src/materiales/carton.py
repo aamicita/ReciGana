@@ -11,6 +11,13 @@ class Carton(MaterialBase):
 
     PRECIO_BASE = 0.25
 
+    @classmethod
+    def cambiar_percio_base(cls, nuevo_precio):
+        if nuevo_precio <= 0:
+            raise ValueError("el precio no puede ser menor a cero.")
+        cls.PRECIO_BASE = nuevo_precio
+
+
     def get_tipo(self) -> str:
         return "carton"
 
