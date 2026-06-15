@@ -18,7 +18,7 @@ app.add_middleware(
 
 @app.get("/")
 def inicio():
-    return {"mensaje": "ReciGana API PRUEBA ", "estado": "ok"}
+    return {"mensaje": "ReciGana API PRUBA 3  ", "estado": "ok"}
 
 @app.get("/health")
 def health():
