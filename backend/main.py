@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import engine
 from models import Base
 from routers import usuarios, materiales
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 Base.metadata.create_all(bind=engine)
 
@@ -18,7 +20,7 @@ app.add_middleware(
 
 @app.get("/")
 def inicio():
-    return {"mensaje": "ReciGana API activa", "estado": "ok"}
+    return {"mensaje": "ReciGana API PRUBA 3  ", "estado": "ok"}
 
 @app.get("/health")
 def health():
