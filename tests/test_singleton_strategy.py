@@ -1,9 +1,9 @@
 ﻿import sys
 import os
-import pytest
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from src.gestor_sistema import GestorSistema
+from src.usuarios.gestor_sistema import GestorSistema
 from src.materiales.estrategia_puntos import (
     CalculadorPuntos, PuntosEstandar, PuntosEspecial, PuntosOrganico
 )
