@@ -15,6 +15,29 @@ class MaterialBase(ABC):
     # ======================================================
     ESTADOS_VALIDOS = {"disponible", "en_negociacion", "vendido"}
 
+
+    # ======================================================
+    # PRECIO BASE (ATRIBUTO DE CLASE)
+    # ======================================================
+    # Cada subclase (Carton, Papel, Vidrio, etc.) DEBE
+    # sobreescribir este valor con su propio precio base
+    # por kg, por ejemplo:
+    #
+    #   class Vidrio(MaterialBase):
+    #       PRECIO_BASE = 0.20
+    #
+    # Al estar definido aquí en la clase base, todas las
+    # subclases heredan automáticamente el método
+    # `cambiar_precio_base` sin necesidad de reescribirlo
+    # en cada una.
+    # ======================================================
+    PRECIO_BASE = 0.0
+    
+    @classmethod
+    def cambiar_precio_base(cls, nuevo_precio):
+        if not isinstance(nuevo_precio, (int, float)) or nuevo_precio <= 0:
+            raise ValueError("El precio base debe ser un número mayor a cero.")
+        cls.PRECIO_BASE = nuevo_precio
     # ======================================================
     # CONSTRUCTOR
     # ======================================================
