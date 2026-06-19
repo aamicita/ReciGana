@@ -10,13 +10,13 @@ class Carton(MaterialBase):
     """
 
     PRECIO_BASE = 0.25
-
-    @classmethod
+ 
+     @classmethod
     def cambiar_precio_base(cls, nuevo_precio: float):
         if not isinstance(nuevo_precio, (int, float)) or nuevo_precio <= 0:
             raise ValueError("El precio debe ser mayor a cero.")
         cls.PRECIO_BASE = nuevo_precio
- 
+        
     def get_tipo(self) -> str:
         return "carton"
 
