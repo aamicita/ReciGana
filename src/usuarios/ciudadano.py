@@ -15,38 +15,38 @@ class Ciudadano(Usuarios):
         super().__init__(id_usuario, nombre, telefono, correo, contrasenia, rol="ciudadano")
 
         # Atributo propio del ciudadano: su dirección física en Manta
-        self.__direccion = direccion
+        self._direccion = direccion
 
         # Lista interna de materiales publicados por este ciudadano
-        self.__materiales_publicados = []
+        self._materiales_publicados = []
 
         # Lista interna de ofertas recibidas sobre sus materiales
-        self.__ofertas_recibidas = []
+        self._ofertas_recibidas = []
 
     # ---------- Propiedades ----------
 
     @property
     def direccion(self):
         """Retorna la dirección del ciudadano."""
-        return self.__direccion
+        return self._direccion
 
     @direccion.setter
     def direccion(self, valor):
         """Actualiza la dirección solo si el valor no está vacío."""
         if isinstance(valor, str) and len(valor.strip()) >= 5:
-            self.__direccion = valor.strip()
+            self._direccion = valor.strip()
         else:
             raise ValueError("La dirección debe tener al menos 5 caracteres.")
 
     @property
     def materiales_publicados(self):
         """Retorna una copia de la lista de materiales publicados."""
-        return list(self.__materiales_publicados)
+        return list(self._materiales_publicados)
 
     @property
     def ofertas_recibidas(self):
         """Retorna una copia de la lista de ofertas recibidas."""
-        return list(self.__ofertas_recibidas)
+        return list(self._ofertas_recibidas)
 
     # ---------- Métodos ----------
 
@@ -82,7 +82,7 @@ class Ciudadano(Usuarios):
         }
 
         # Lo agregamos a la lista interna del ciudadano
-        self.__materiales_publicados.append(material)
+        self._materiales_publicados.append(material)
 
         if foto:
             print(f"Material publicado con foto: {tipo}, {peso} kg")
@@ -97,7 +97,7 @@ class Ciudadano(Usuarios):
         Parámetro:
             oferta -- diccionario con los datos de la oferta
         """
-        self.__ofertas_recibidas.append(oferta)
+        self._ofertas_recibidas.append(oferta)
         print(f"Nueva oferta recibida: {oferta}")
 
     def aceptar_oferta(self, oferta):
@@ -107,7 +107,7 @@ class Ciudadano(Usuarios):
             oferta -- diccionario con los datos de la oferta a aceptar
         Retorna True si se aceptó correctamente.
         """
-        if oferta in self.__ofertas_recibidas:
+        if oferta in self._ofertas_recibidas:
             oferta["estado"] = "aceptada"
             print(f"Oferta aceptada: {oferta}")
             return True
@@ -121,7 +121,7 @@ class Ciudadano(Usuarios):
             oferta -- diccionario con los datos de la oferta a rechazar
         Retorna True si se rechazó correctamente.
         """
-        if oferta in self.__ofertas_recibidas:
+        if oferta in self._ofertas_recibidas:
             oferta["estado"] = "rechazada"
             print(f"Oferta rechazada: {oferta}")
             return True
@@ -130,4 +130,4 @@ class Ciudadano(Usuarios):
 
     def __str__(self):
         """Representación legible del ciudadano."""
-        return f"Ciudadano: {self.nombre} | Dirección: {self.__direccion} | Materiales publicados: {len(self.__materiales_publicados)}"
+        return f"Ciudadano: {self.nombre} | Dirección: {self._direccion} | Materiales publicados: {len(self._materiales_publicados)}"

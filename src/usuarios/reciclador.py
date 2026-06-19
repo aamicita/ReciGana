@@ -18,38 +18,38 @@ class Reciclador(Usuarios):
 
         # Zona geográfica de Manta donde opera el reciclador
         # Ejemplo: "Manta centro", "Los Esteros", "Tarqui"
-        self.__zona_cobertura = zona_cobertura
+        self._zona_cobertura = zona_cobertura
 
         # Lista interna de ofertas que este reciclador ha realizado
-        self.__ofertas_realizadas = []
+        self._ofertas_realizadas = []
 
         # Lista interna de materiales que ha comprado exitosamente
-        self.__materiales_comprados = []
+        self._materiales_comprados = []
 
     # ---------- Propiedades ----------
 
     @property
     def zona_cobertura(self):
         """Retorna la zona de cobertura del reciclador."""
-        return self.__zona_cobertura
+        return self._zona_cobertura
 
     @zona_cobertura.setter
     def zona_cobertura(self, valor):
         """Actualiza la zona de cobertura solo si el valor es válido."""
         if isinstance(valor, str) and len(valor.strip()) >= 3:
-            self.__zona_cobertura = valor.strip()
+            self._zona_cobertura = valor.strip()
         else:
             raise ValueError("La zona de cobertura debe tener al menos 3 caracteres.")
 
     @property
     def ofertas_realizadas(self):
         """Retorna una copia de las ofertas realizadas por el reciclador."""
-        return list(self.__ofertas_realizadas)
+        return list(self._ofertas_realizadas)
 
     @property
     def materiales_comprados(self):
         """Retorna una copia de los materiales comprados por el reciclador."""
-        return list(self.__materiales_comprados)
+        return list(self._materiales_comprados)
 
     # ---------- Métodos ----------
 
@@ -58,7 +58,7 @@ class Reciclador(Usuarios):
         Confirma que el reciclador fue registrado correctamente en el sistema.
         Retorna True para indicar éxito.
         """
-        print(f"Reciclador '{self.nombre}' registrado en la zona '{self.__zona_cobertura}'.")
+        print(f"Reciclador '{self.nombre}' registrado en la zona '{self._zona_cobertura}'.")
         return True
 
     def consultar_ofertas(self, materiales_disponibles):
@@ -108,7 +108,7 @@ class Reciclador(Usuarios):
         }
 
         # La guardamos en la lista interna del reciclador
-        self.__ofertas_realizadas.append(oferta)
+        self._ofertas_realizadas.append(oferta)
         print(f"Oferta realizada: {precio_ofrecido} USD por {material.get('tipo')} ({material.get('peso_kg')} kg)")
 
         return oferta
@@ -120,10 +120,10 @@ class Reciclador(Usuarios):
         Parámetro:
             oferta -- diccionario de la oferta aceptada
         """
-        if oferta in self.__ofertas_realizadas:
+        if oferta in self._ofertas_realizadas:
             oferta["estado"] = "aceptada"
             # Registramos el material como comprado
-            self.__materiales_comprados.append(oferta)
+            self._materiales_comprados.append(oferta)
             print(f"¡Oferta aceptada! Compraste {oferta.get('material')} por {oferta.get('precio_ofrecido')} USD.")
         else:
             print("La oferta no pertenece a este reciclador.")
@@ -134,7 +134,7 @@ class Reciclador(Usuarios):
         Parámetro:
             oferta -- diccionario de la oferta rechazada
         """
-        if oferta in self.__ofertas_realizadas:
+        if oferta in self._ofertas_realizadas:
             oferta["estado"] = "rechazada"
             print(f"Oferta rechazada para {oferta.get('material')}.")
         else:
@@ -143,6 +143,6 @@ class Reciclador(Usuarios):
     def __str__(self):
         """Representación legible del reciclador."""
         return (f"Reciclador: {self.nombre} | "
-                f"Zona: {self.__zona_cobertura} | "
-                f"Ofertas realizadas: {len(self.__ofertas_realizadas)} | "
-                f"Materiales comprados: {len(self.__materiales_comprados)}")
+                f"Zona: {self._zona_cobertura} | "
+                f"Ofertas realizadas: {len(self._ofertas_realizadas)} | "
+                f"Materiales comprados: {len(self._materiales_comprados)}")
