@@ -16,22 +16,22 @@ class Administrador(Usuarios):
         super().__init__(id_usuario, nombre, telefono, correo, contrasenia, rol="administrador")
 
         # Lista interna de usuarios registrados en la plataforma
-        self.__usuarios = []
+        self._usuarios = []
 
         # Lista interna de ofertas activas en la plataforma
-        self.__ofertas = []
+        self._ofertas = []
 
     # ---------- Propiedades ----------
 
     @property
     def usuarios(self):
         """Retorna una copia de la lista de usuarios registrados."""
-        return list(self.__usuarios)
+        return list(self._usuarios)
 
     @property
     def ofertas(self):
         """Retorna una copia de la lista de ofertas activas."""
-        return list(self.__ofertas)
+        return list(self._ofertas)
 
     # ---------- Gestión de usuarios ----------
 
@@ -40,11 +40,11 @@ class Administrador(Usuarios):
         Muestra un resumen de todos los usuarios registrados en la plataforma.
         Retorna la lista de usuarios.
         """
-        total = len(self.__usuarios)
+        total = len(self._usuarios)
         print(f"Total de usuarios registrados: {total}")
-        for usuario in self.__usuarios:
+        for usuario in self._usuarios:
             print(f"  - {usuario}")
-        return self.__usuarios
+        return self._usuarios
 
     def agregar_usuario(self, usuario):
         """
@@ -54,12 +54,12 @@ class Administrador(Usuarios):
         Retorna True si se agregó correctamente.
         """
         # Verificamos que no exista ya un usuario con el mismo id
-        ids_existentes = [u.id for u in self.__usuarios]
+        ids_existentes = [u.id for u in self._usuarios]
         if usuario.id in ids_existentes:
             print(f"Ya existe un usuario con el id '{usuario.id}'.")
             return False
 
-        self.__usuarios.append(usuario)
+        self._usuarios.append(usuario)
         print(f"Usuario '{usuario.nombre}' agregado exitosamente.")
         return True
 
@@ -70,9 +70,9 @@ class Administrador(Usuarios):
             id_usuario -- identificador del usuario a eliminar
         Retorna True si se eliminó, False si no se encontró.
         """
-        for usuario in self.__usuarios:
+        for usuario in self._usuarios:
             if usuario.id == id_usuario:
-                self.__usuarios.remove(usuario)
+                self._usuarios.remove(usuario)
                 print(f"Usuario '{usuario.nombre}' eliminado.")
                 return True
         print(f"No se encontró un usuario con id '{id_usuario}'.")
@@ -83,7 +83,7 @@ class Administrador(Usuarios):
         Busca un usuario por su id.
         Retorna el usuario si existe, None si no se encuentra.
         """
-        for usuario in self.__usuarios:
+        for usuario in self._usuarios:
             if usuario.id == id_usuario:
                 return usuario
         return None
@@ -95,11 +95,11 @@ class Administrador(Usuarios):
         Muestra un resumen de todas las ofertas activas en la plataforma.
         Retorna la lista de ofertas.
         """
-        total = len(self.__ofertas)
+        total = len(self._ofertas)
         print(f"Total de ofertas activas: {total}")
-        for oferta in self.__ofertas:
+        for oferta in self._ofertas:
             print(f"  - {oferta}")
-        return self.__ofertas
+        return self._ofertas
 
     def agregar_oferta(self, oferta):
         """
@@ -107,7 +107,7 @@ class Administrador(Usuarios):
         Parámetro:
             oferta -- diccionario con los datos de la oferta
         """
-        self.__ofertas.append(oferta)
+        self._ofertas.append(oferta)
         print(f"Oferta registrada: {oferta}")
 
     # ---------- Reportes ----------
@@ -118,13 +118,13 @@ class Administrador(Usuarios):
         Retorna un diccionario con las estadísticas principales.
         """
         # Contamos ofertas según su estado
-        aceptadas = sum(1 for o in self.__ofertas if o.get("estado") == "aceptada")
-        rechazadas = sum(1 for o in self.__ofertas if o.get("estado") == "rechazada")
-        pendientes = sum(1 for o in self.__ofertas if o.get("estado") == "pendiente")
+        aceptadas = sum(1 for o in self._ofertas if o.get("estado") == "aceptada")
+        rechazadas = sum(1 for o in self._ofertas if o.get("estado") == "rechazada")
+        pendientes = sum(1 for o in self._ofertas if o.get("estado") == "pendiente")
 
         reporte = {
-            "total_usuarios": len(self.__usuarios),
-            "total_ofertas": len(self.__ofertas),
+            "total_usuarios": len(self._usuarios),
+            "total_ofertas": len(self._ofertas),
             "ofertas_aceptadas": aceptadas,
             "ofertas_rechazadas": rechazadas,
             "ofertas_pendientes": pendientes,
@@ -139,4 +139,4 @@ class Administrador(Usuarios):
 
     def __str__(self):
         """Representación legible del administrador."""
-        return f"Administrador: {self.nombre} | Usuarios: {len(self.__usuarios)} | Ofertas: {len(self.__ofertas)}"
+        return f"Administrador: {self.nombre} | Usuarios: {len(self._usuarios)} | Ofertas: {len(self._ofertas)}"

@@ -13,12 +13,12 @@ class Usuarios:
     ROLES_VALIDOS = {"ciudadano", "administrador"}
 
     def __init__(self, id_usuario, nombre, telefono, correo, contrasenia, rol="ciudadano"):
-        self.__id = id_usuario
-        self.__nombre = nombre
-        self.__telefono = telefono
-        self.__correo = correo
+        self._id = id_usuario
+        self._nombre = nombre
+        self._telefono = telefono
+        self._correo = correo
         self.__contrasenia = self.__encriptar(contrasenia)
-        self.__rol = rol if rol in self.ROLES_VALIDOS else "ciudadano"
+        self._rol = rol if rol in self.ROLES_VALIDOS else "ciudadano"
         self._sesion_activa = False
 
     # ---------- Encriptación ----------
@@ -36,45 +36,45 @@ class Usuarios:
 
     @property
     def id(self):
-        return self.__id
+        return self._id
 
     @property
     def nombre(self):
-        return self.__nombre
+        return self._nombre
 
     @nombre.setter
     def nombre(self, valor):
         if isinstance(valor, str) and len(valor.strip()) >= 2:
-            self.__nombre = valor.strip()
+            self._nombre = valor.strip()
         else:
             raise ValueError("El nombre debe tener al menos 2 caracteres.")
 
     @property
     def telefono(self):
-        return self.__telefono
+        return self._telefono
 
     @telefono.setter
     def telefono(self, valor):
         if isinstance(valor, str) and valor.strip().isdigit() and len(valor.strip()) >= 7:
-            self.__telefono = valor.strip()
+            self._telefono = valor.strip()
         else:
             raise ValueError("El teléfono debe contener solo dígitos y tener al menos 7 caracteres.")
 
     @property
     def correo(self):
-        return self.__correo
+        return self._correo
 
     @correo.setter
     def correo(self, valor):
         patron = r'^[\w\.-]+@[\w\.-]+\.\w{2,}$'
         if isinstance(valor, str) and re.match(patron, valor):
-            self.__correo = valor.lower()
+            self._correo = valor.lower()
         else:
             raise ValueError("El correo no tiene un formato válido.")
 
     @property
     def rol(self):
-        return self.__rol
+        return self._rol
 
     @property
     def sesion_activa(self):
@@ -95,10 +95,10 @@ class Usuarios:
 
     def es_administrador(self):
         """Retorna True si el usuario tiene rol de administrador."""
-        return self.__rol == "administrador"
+        return self._rol == "administrador"
 
     def __str__(self):
-        return f"[{self.__rol.upper()}] {self.__nombre} ({self.__correo})"
+        return f"[{self._rol.upper()}] {self._nombre} ({self._correo})"
 
     def __repr__(self):
-        return f"Usuarios(id={self.__id}, nombre={self.__nombre}, rol={self.__rol})"
+        return f"Usuarios(id={self._id}, nombre={self._nombre}, rol={self._rol})"

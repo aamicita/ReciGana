@@ -18,12 +18,12 @@
 
     def __init__(self):
         # Lista de usuarios registrados en el sistema
-        self.__usuarios = []
+        self._usuarios = []
         # Lista de materiales publicados en el sistema
-        self.__materiales = []
+        self._materiales = []
         # Contador de IDs autoincrementables
-        self.__contador_usuarios   = 1
-        self.__contador_materiales = 1
+        self._contador_usuarios   = 1
+        self._contador_materiales = 1
 
     @classmethod
     def obtener_instancia(cls):
@@ -51,43 +51,43 @@
 
     def registrar_usuario(self, usuario):
         """Agrega un usuario al sistema."""
-        self.__usuarios.append(usuario)
+        self._usuarios.append(usuario)
         print(f"Usuario '{usuario.nombre}' registrado en el sistema.")
         return usuario
 
     def obtener_usuarios(self):
         """Retorna copia de la lista de usuarios."""
-        return list(self.__usuarios)
+        return list(self._usuarios)
 
     def buscar_usuario(self, id_usuario):
         """Busca un usuario por su ID."""
-        for u in self.__usuarios:
+        for u in self._usuarios:
             if u.id == id_usuario:
                 return u
         return None
 
     def siguiente_id_usuario(self):
         """Genera un ID unico para un nuevo usuario."""
-        id_generado = self.__contador_usuarios
-        self.__contador_usuarios += 1
+        id_generado = self._contador_usuarios
+        self._contador_usuarios += 1
         return id_generado
 
     # ---------- Materiales ----------
 
     def registrar_material(self, material):
         """Agrega un material al sistema."""
-        self.__materiales.append(material)
+        self._materiales.append(material)
         print(f"Material '{material.get_tipo()}' registrado en el sistema.")
         return material
 
     def obtener_materiales(self):
         """Retorna copia de la lista de materiales."""
-        return list(self.__materiales)
+        return list(self._materiales)
 
     def siguiente_id_material(self):
         """Genera un ID unico para un nuevo material."""
-        id_generado = self.__contador_materiales
-        self.__contador_materiales += 1
+        id_generado = self._contador_materiales
+        self._contador_materiales += 1
         return id_generado
 
     # ---------- Resumen ----------
@@ -97,13 +97,13 @@
         print("=" * 40)
         print("  RESUMEN DEL SISTEMA ReciGana")
         print("=" * 40)
-        print(f"  Usuarios registrados : {len(self.__usuarios)}")
-        print(f"  Materiales publicados: {len(self.__materiales)}")
+        print(f"  Usuarios registrados : {len(self._usuarios)}")
+        print(f"  Materiales publicados: {len(self._materiales)}")
         print("=" * 40)
 
     def __str__(self):
         return (
             f"GestorSistema("
-            f"usuarios={len(self.__usuarios)}, "
-            f"materiales={len(self.__materiales)})"
+            f"usuarios={len(self._usuarios)}, "
+            f"materiales={len(self._materiales)})"
         )
