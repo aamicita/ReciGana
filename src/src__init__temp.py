@@ -1,5 +1,6 @@
-# __init__ principal del sistema el que maneja casi todo
-
+# __init__ principal del sistema ReciGana
+# Aqui se exportan todas las clases disponibles del sistema
+ 
 from .usuarios import Administrador, Ciudadano, Reciclador, Usuarios
 from .usuarios import GestorSistema
 from .usuarios import FabricaUsuariosBase, FabricaUsuariosManta
@@ -15,7 +16,13 @@ from .comunicaciones import (
     Calificacion,
     ReporteBuilder,
 )
+ 
+# NUEVO: importamos la Facade para que sea accesible desde el paquete raiz.
+# Ahora cualquier archivo se puede hacer simplemente:
 
+# en lugar de importar cada clase por separado.
+from .facade_recigana import ReciGanaFacade
+ 
 __all__ = [
     "Usuarios", "Administrador", "Ciudadano", "Reciclador",
     "GestorSistema",
@@ -25,4 +32,6 @@ __all__ = [
     "PrototipoMaterial", "OfertaVentaBuilder",
     "Notificacion", "Reporte", "HistorialDeReciclaje",
     "Calificacion", "ReporteBuilder",
+    # NUEVO: la Facade queda disponible como parte del paquete
+    "ReciGanaFacade",
 ]
