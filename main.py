@@ -104,6 +104,61 @@ def main():
         # Retorna el valor total: 5kg x $0.80 = $4.00
         material.calcular_valor(0.80)
 
+        #Precio base de materiales reciclables
+        print("\n ---Precio base de materiales reciclables---")
+
+        #Importamos cada clase de material para accedes a su atributo PRECIO_BASE definido en su propio archivo
+        from src.materiales.metal import Metal
+        from src.materiales.carton import Carton
+        from src.materiales.vidrio import Vidrio
+        from src.materiales.plastico import Plastico
+        from src.materiales.papel import Papel
+        from src.materiales.organico import Organico
+
+        # Mostramos el precio base de cada material reciclable   
+        # Estos valore vienen directamente de cada clase 
+        print(f"Precio base de Metal: ${Metal.PRECIO_BASE}")
+        print(f"Precio base de Cartón: ${Carton.PRECIO_BASE}")
+        print(f"Precio base de Vidrio: ${Vidrio.PRECIO_BASE}")
+        print(f"Precio base de Plástico: ${Plastico.PRECIO_BASE}")
+        print(f"Precio base de Papel: ${Papel.PRECIO_BASE}")
+        print(f"Precio base de Orgánico: ${Organico.PRECIO_BASE}")
+
+        #Preguntamos al usuario si desea modificar algun precio base
+        #El usuario decide si quier hacer cambios o no
+        modificar_precio = input("\n¿Desea modificar algún precio base? (s/n): ").strip().lower()
+        if modificar_precio == 's':
+            #Solicitamos al usuario el material y el nuevo precio
+            material_a_modificar = input("Ingrese el material a modificar (metal, carton, vidrio, plastico, papel, organico): ").strip().lower()
+            nuevo_precio = float(input("Ingrese el nuevo precio base: "))
+
+            #Modificamos el precio base del material seleccionadotry:
+            try:
+                if material_a_modificar == "metal":
+                    Metal.cambiar_precio_base(nuevo_precio)
+                    print(f"Precio base de Metal modificado a: ${Metal.PRECIO_BASE}")
+                elif material_a_modificar == "carton":
+                    Carton.cambiar_precio_base(nuevo_precio)
+                    print(f"Precio base de Cartón modificado a: ${Carton.PRECIO_BASE}")
+                elif material_a_modificar == "vidrio":
+                    Vidrio.cambiar_precio_base(nuevo_precio)
+                    print(f"Precio base de Vidrio modificado a: ${Vidrio.PRECIO_BASE}")
+                elif material_a_modificar == "plastico":
+                    Plastico.cambiar_precio_base(nuevo_precio)
+                    print(f"Precio base de Plástico modificado a: ${Plastico.PRECIO_BASE}")
+                elif material_a_modificar == "papel":
+                    Papel.cambiar_precio_base(nuevo_precio)
+                    print(f"Precio base de Papel modificado a: ${Papel.PRECIO_BASE}")
+                elif material_a_modificar == "organico":
+                    Organico.cambiar_precio_base(nuevo_precio)
+                    print(f"Precio base de Orgánico modificado a: ${Organico.PRECIO_BASE}")
+                else:
+                    print("Material no reconocido. No se realizaron cambios.")
+            except ValueError as ve:
+                # Si el precio es 0 o negativo, capturamos el error
+                print(f"Error: {ve}")
+
+
         # ===== PASO 6: RECICLADOR CONSULTA Y HACE OFERTA =====
         print("\n--- Reciclador consulta materiales y hace oferta ---")
 
