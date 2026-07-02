@@ -12,9 +12,9 @@ class Reciclador(Usuarios):
     """
 
     def __init__(self, id_usuario, nombre, telefono, correo, contrasenia, zona_cobertura):
-        # Llamamos al constructor padre asignando rol "ciudadano"
+        # Llamamos al constructor padre asignando rol "reciclador"
         # (el reciclador es un tipo especial de usuario registrado)
-        super().__init__(id_usuario, nombre, telefono, correo, contrasenia, rol="ciudadano")
+        super().__init__(id_usuario, nombre, telefono, correo, contrasenia, rol="reciclador")
 
         # Zona geográfica de Manta donde opera el reciclador
         # Ejemplo: "Manta centro", "Los Esteros", "Tarqui"
