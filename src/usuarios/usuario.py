@@ -10,7 +10,7 @@ class Usuarios:
     Representa a cualquier persona registrada en la plataforma.
     """
 
-    ROLES_VALIDOS = {"ciudadano", "administrador"}
+    ROLES_VALIDOS = {"ciudadano", "administrador", "reciclador"}
 
     def __init__(self, id_usuario, nombre, telefono, correo, contrasenia, rol="ciudadano"):
         self._id = id_usuario

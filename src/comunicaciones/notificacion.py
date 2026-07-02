@@ -138,5 +138,8 @@ class Notificacion:
         Representación legible cuando se imprime con print().
         Ejemplo: "[🔔 No leída] 2024-01-15 10:30:00 | Tu oferta fue aceptada"
         """
-      
+        if self.__leida:
+            estado = "Leida"
+        else:
+            estado = "No leída"
         return f"[{estado}] {self.__fecha_creacion} | {self.__mensaje}"
