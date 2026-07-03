@@ -1,16 +1,20 @@
+from abc import ABC, abstractmethod
+from datetime import datetime
+
+# =============================================================================
+# 1) SIMULACIÓN DE LA VERSIÓN SIN PATRÓN (Para que la Demo 1 funcione)
+# =============================================================================
+def realizar_intercambio_sin_patron(ciudadano, reciclador, tipo_material, peso_kg, precio):
+    """Simula la versión antigua donde el Facade hacía todo manualmente."""
+    print(f"Negociación #NEG-001 iniciada (Sin Patrón). Precio: ${precio}")
+    print(f"Negociación #NEG-001 finalizada (Sin Patrón). Precio: ${precio}")
+    # Notificación manual hardcodeada
+    print(f"Notificación enviada a '{ciudadano}': Vendiste {peso_kg}kg de '{tipo_material}' por ${precio}.")
+    print(f"Notificación enviada a '{reciclador}': Compraste {peso_kg}kg de '{tipo_material}' por ${precio}.")
+
+
 # =============================================================================
 # 2) IMPLEMENTACIÓN CON EL PATRÓN DE COMPORTAMIENTO "OBSERVER"
-# =============================================================================
-#
-# Idea del patrón: el objeto que cambia de estado (el SUJETO / OBSERVABLE)
-# mantiene una lista de "observadores" suscritos. Cada vez que ocurre un
-# evento relevante, el sujeto simplemente recorre su lista y les avisa a
-# TODOS, sin necesitar saber qué hace cada observador con esa información.
-#
-# Esto invierte la dependencia: en la versión anterior, el Facade "conocía"
-# a la Negociacion y decidía a quién avisar. Ahora es la propia Negociacion
-# quien avisa a quien esté suscrito, y el Facade (o cualquier otra parte
-# del sistema) solo se encarga de suscribir observadores al inicio.
 # =============================================================================
 
 class ObservadorNegociacion(ABC):
@@ -24,18 +28,14 @@ class ObservadorNegociacion(ABC):
         """
         Es llamado automáticamente por el sujeto (Negociacion) cada vez
         que ocurre un evento relevante.
-            negociacion -- la instancia de Negociacion que cambió
-            evento      -- texto que describe qué pasó
-                            ("iniciada", "finalizada", "cancelada")
         """
-        ...
+        pass
 
 
 class SujetoObservable:
     """
     Clase base reutilizable que implementa el mecanismo de suscripción y
-    notificación del patrón Observer. Cualquier clase del sistema que
-    necesite avisar a observadores puede heredar de aquí.
+    notificación del patrón Observer.
     """
 
     def __init__(self):
@@ -56,13 +56,7 @@ class SujetoObservable:
 
 class Negociacion(SujetoObservable):
     """
-    Representa el proceso de negociación entre un ciudadano (vendedor) y
-    un reciclador (comprador) sobre el precio de un material reciclable.
-
-    SUJETO/OBSERVABLE del patrón Observer: cada vez que cambia de estado
-    (se inicia, se finaliza o se cancela), notifica automáticamente a
-    todos los observadores que estén suscritos, sin necesitar saber qué
-    hace cada uno con esa información.
+    SUJETO/OBSERVABLE del patrón Observer.
     """
 
     ESTADOS_VALIDOS = {"pendiente", "iniciada", "finalizada", "cancelada"}
@@ -95,8 +89,6 @@ class Negociacion(SujetoObservable):
         self.estado = "finalizada"
         self.fecha_cierre = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"Negociación #{self.id_negociacion} finalizada. Precio: ${self.precio_final}")
-        # Aquí es donde antes el Facade tenía que avisar "a mano".
-        # Ahora la propia Negociacion avisa a todos sus interesados.
         self.notificar_observadores("finalizada")
         return True
 
@@ -116,9 +108,6 @@ class Negociacion(SujetoObservable):
 
 
 # ---------- Observadores concretos ----------
-# Reutilizan la clase Notificacion tal como existe en el proyecto real
-# (src/comunicaciones/notificacion.py). Aquí usamos una versión mínima
-# para que el ejemplo sea autocontenido y ejecutable.
 
 class NotificacionSimple2:
     """Versión mínima de Notificacion, solo para esta demo."""
@@ -133,11 +122,7 @@ class NotificacionSimple2:
 
 
 class ObservadorCiudadano(ObservadorNegociacion):
-    """
-    Observador concreto que representa al ciudadano (vendedor). Reacciona
-    solamente cuando la negociación se finaliza, generando una notificación
-    de venta.
-    """
+    """Observador concreto que representa al ciudadano (vendedor)."""
 
     def __init__(self, nombre, peso_kg, tipo_material):
         self.nombre = nombre
@@ -157,11 +142,7 @@ class ObservadorCiudadano(ObservadorNegociacion):
 
 
 class ObservadorReciclador(ObservadorNegociacion):
-    """
-    Observador concreto que representa al reciclador (comprador). Reacciona
-    solamente cuando la negociación se finaliza, generando una notificación
-    de compra.
-    """
+    """Observador concreto que representa al reciclador (comprador)."""
 
     def __init__(self, nombre, peso_kg, tipo_material):
         self.nombre = nombre
@@ -181,12 +162,7 @@ class ObservadorReciclador(ObservadorNegociacion):
 
 
 class ObservadorAuditoria(ObservadorNegociacion):
-    """
-    Observador concreto adicional: un módulo de auditoría interno que
-    registra TODOS los eventos de TODAS las negociaciones. Se agrega sin
-    tocar ni una sola línea de la clase Negociacion ni de los otros
-    observadores: esa es la ventaja principal del patrón Observer.
-    """
+    """Módulo de auditoría interno que registra todos los eventos."""
 
     def __init__(self):
         self.registro = []
@@ -198,13 +174,8 @@ class ObservadorAuditoria(ObservadorNegociacion):
 
 
 def realizar_intercambio_con_patron(ciudadano, reciclador, tipo_material, peso_kg, precio,
-                                     con_auditoria=False):
-    """
-    Simula el método del Facade con el patrón Observer aplicado: ya no
-    tiene que acordarse de notificar a cada interesado manualmente.
-    Simplemente suscribe a los observadores UNA vez y la propia
-    Negociacion se encarga de avisarles cuando corresponda.
-    """
+                                    con_auditoria=False):
+    """Simula el método del Facade usando Observer."""
     negociacion = Negociacion(
         id_negociacion="NEG-002",
         precio_final=precio,
@@ -212,14 +183,10 @@ def realizar_intercambio_con_patron(ciudadano, reciclador, tipo_material, peso_k
         fecha_inicio=datetime.now().strftime("%Y-%m-%d"),
     )
 
-    # Suscribimos a los interesados. El Facade ya NO decide cuándo ni con
-    # qué mensaje avisarles: eso ahora lo sabe cada observador.
     negociacion.suscribir(ObservadorCiudadano(ciudadano, peso_kg, tipo_material))
     negociacion.suscribir(ObservadorReciclador(reciclador, peso_kg, tipo_material))
 
     if con_auditoria:
-        # Agregar un nuevo interesado es tan simple como suscribirlo:
-        # no se modifica Negociacion ni los demás observadores.
         negociacion.suscribir(ObservadorAuditoria())
 
     negociacion.iniciar_negociacion()
@@ -231,13 +198,6 @@ def realizar_intercambio_con_patron(ciudadano, reciclador, tipo_material, peso_k
 # =============================================================================
 # 3) EJEMPLO DE USO
 # =============================================================================
-#
-# Demuestra el mismo flujo de negocio (iniciar -> finalizar una negociación
-# de compraventa) primero con la versión SIN patrón y luego con la versión
-# CON el patrón Observer, incluyendo un tercer observador (auditoría) que
-# se agrega sin modificar ninguna clase existente.
-# =============================================================================
-
 if __name__ == "__main__":
 
     print("=" * 70)
