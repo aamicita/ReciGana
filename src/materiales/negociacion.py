@@ -1,173 +1,196 @@
-# Clase de negociación del sistema ReciGana
-# Gestiona el proceso de negociación entre un ciudadano y un reciclador
-# cuando acuerdan el precio de un material reciclable
+from abc import ABC, abstractmethod
+from datetime import datetime
 
-from datetime import datetime  # Para registrar fechas de inicio y cierre
+# =============================================================================
+# 1) SIMULACIÓN DE LA VERSIÓN SIN PATRÓN (Para que la Demo 1 funcione)
+# =============================================================================
+def realizar_intercambio_sin_patron(ciudadano, reciclador, tipo_material, peso_kg, precio):
+    """Simula la versión antigua donde el Facade hacía todo manualmente."""
+    print(f"Negociación #NEG-001 iniciada (Sin Patrón). Precio: ${precio}")
+    print(f"Negociación #NEG-001 finalizada (Sin Patrón). Precio: ${precio}")
+    # Notificación manual hardcodeada
+    print(f"Notificación enviada a '{ciudadano}': Vendiste {peso_kg}kg de '{tipo_material}' por ${precio}.")
+    print(f"Notificación enviada a '{reciclador}': Compraste {peso_kg}kg de '{tipo_material}' por ${precio}.")
 
 
-class Negociacion:
+# =============================================================================
+# 2) IMPLEMENTACIÓN CON EL PATRÓN DE COMPORTAMIENTO "OBSERVER"
+# =============================================================================
+
+class ObservadorNegociacion(ABC):
     """
-    Representa el proceso de negociación entre un ciudadano (vendedor)
-    y un reciclador (comprador) sobre el precio de un material reciclable.
-    Ciclo de vida: pendiente → iniciada → finalizada o cancelada
+    Interfaz que deben implementar todos los observadores interesados en
+    los cambios de estado de una Negociacion.
     """
 
-    # Estados válidos por los que puede pasar una negociación
+    @abstractmethod
+    def actualizar(self, negociacion, evento: str):
+        """
+        Es llamado automáticamente por el sujeto (Negociacion) cada vez
+        que ocurre un evento relevante.
+        """
+        pass
+
+
+class SujetoObservable:
+    """
+    Clase base reutilizable que implementa el mecanismo de suscripción y
+    notificación del patrón Observer.
+    """
+
+    def __init__(self):
+        self._observadores = []
+
+    def suscribir(self, observador: ObservadorNegociacion):
+        if observador not in self._observadores:
+            self._observadores.append(observador)
+
+    def desuscribir(self, observador: ObservadorNegociacion):
+        if observador in self._observadores:
+            self._observadores.remove(observador)
+
+    def notificar_observadores(self, evento: str):
+        for observador in self._observadores:
+            observador.actualizar(self, evento)
+
+
+class Negociacion(SujetoObservable):
+    """
+    SUJETO/OBSERVABLE del patrón Observer.
+    """
+
     ESTADOS_VALIDOS = {"pendiente", "iniciada", "finalizada", "cancelada"}
 
-    def __init__(self, id_negociacion, precio_final, estado, fecha_inicio, fecha_cierre=None):
-        # Identificador único de esta negociación
-        self.__id_negociacion = id_negociacion
+    def __init__(self, id_negociacion, precio_final, estado, fecha_inicio):
+        super().__init__()
+        self.id_negociacion = id_negociacion
+        self.precio_final = precio_final
 
-        # Precio acordado al final de la negociación (puede cambiar con contra ofertas)
-        if not isinstance(precio_final, (int, float)) or precio_final <= 0:
-            raise ValueError("El precio final debe ser un número mayor a cero.")
-        self.__precio_final = precio_final
-
-        # Validamos que el estado inicial sea uno de los permitidos
         if estado not in self.ESTADOS_VALIDOS:
             raise ValueError(f"Estado inválido. Use uno de: {self.ESTADOS_VALIDOS}")
-        self.__estado = estado
+        self.estado = estado
 
-        # Fecha en que comenzó la negociación (formato: "YYYY-MM-DD")
-        self.__fecha_inicio = fecha_inicio
-
-        # Fecha en que terminó la negociación (None si todavía no ha cerrado)
-        self.__fecha_cierre = fecha_cierre
-
-        # Guardamos el historial de contra ofertas para ver cómo evolucionó el precio
-        # Cada entrada tiene el precio propuesto y la fecha en que se propuso
-        self.__historial_contra_ofertas = []
-
-    # ---------- Propiedades ----------
-
-    @property
-    def id_negociacion(self):
-        # Permite leer el id de la negociación desde fuera de la clase
-        return self.__id_negociacion
-
-    @property
-    def precio_final(self):
-        # Retorna el precio actual acordado en la negociación
-        return self.__precio_final
-
-    @property
-    def estado(self):
-        # Retorna el estado actual de la negociación
-        return self.__estado
-
-    @property
-    def fecha_inicio(self):
-        # Retorna la fecha en que inició la negociación
-        return self.__fecha_inicio
-
-    @property
-    def fecha_cierre(self):
-        # Retorna la fecha en que cerró la negociación (None si sigue abierta)
-        return self.__fecha_cierre
-
-    @property
-    def historial_contra_ofertas(self):
-        # Retorna una copia del historial para no modificar el original
-        return list(self.__historial_contra_ofertas)
-
-    # ---------- Métodos ----------
+        self.fecha_inicio = fecha_inicio
+        self.fecha_cierre = None
 
     def iniciar_negociacion(self):
-        """
-        Inicia formalmente la negociación entre el ciudadano y el reciclador.
-        Solo se puede iniciar si está en estado 'pendiente'.
-        Retorna True si se inició correctamente.
-        """
-        # Verificamos que la negociación esté en estado pendiente antes de iniciarla
-        if self.__estado != "pendiente":
-            print(f"No se puede iniciar. Estado actual: '{self.__estado}'.")
+        if self.estado != "pendiente":
+            print(f"No se puede iniciar. Estado actual: '{self.estado}'.")
             return False
-
-        # Cambiamos el estado a iniciada para indicar que comenzó el proceso
-        self.__estado = "iniciada"
-        print(f"Negociación #{self.__id_negociacion} iniciada. Precio inicial: ${self.__precio_final}")
-        return True
-
-    def proponer_contra_oferta(self, nuevo_precio=None):
-        """
-        Permite proponer un nuevo precio durante la negociación.
-        Solo se puede hacer si la negociación está 'iniciada'.
-        Parámetro:
-            nuevo_precio -- nuevo precio propuesto en dólares (opcional)
-        Retorna True si se registró correctamente.
-        """
-        # No tiene sentido proponer una contra oferta si la negociación no está activa
-        if self.__estado != "iniciada":
-            print("Solo se pueden proponer contra ofertas en negociaciones iniciadas.")
-            return False
-
-        if nuevo_precio is None:
-            # Si no se pasa precio, solo registramos que hubo intención de contra oferta
-            print("Contra oferta propuesta sin nuevo precio.")
-            return True
-
-        # Validamos que el nuevo precio sea un número positivo
-        if not isinstance(nuevo_precio, (int, float)) or nuevo_precio <= 0:
-            raise ValueError("El nuevo precio debe ser un número mayor a cero.")
-
-        # Guardamos la contra oferta en el historial con fecha y hora
-        self.__historial_contra_ofertas.append({
-            "precio": nuevo_precio,
-            "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
-
-        # Actualizamos el precio final con el nuevo precio propuesto
-        self.__precio_final = nuevo_precio
-        print(f"Contra oferta propuesta: nuevo precio ${nuevo_precio}")
+        self.estado = "iniciada"
+        print(f"Negociación #{self.id_negociacion} iniciada. Precio: ${self.precio_final}")
+        self.notificar_observadores("iniciada")
         return True
 
     def finalizar_negociacion(self):
-        """
-        Finaliza la negociación cuando ambas partes llegaron a un acuerdo.
-        Registra automáticamente la fecha de cierre.
-        Solo se puede finalizar si está 'iniciada'.
-        Retorna True si se finalizó correctamente.
-        """
-        # Solo podemos finalizar una negociación que esté en curso
-        if self.__estado != "iniciada":
-            print(f"No se puede finalizar. Estado actual: '{self.__estado}'.")
+        if self.estado != "iniciada":
+            print(f"No se puede finalizar. Estado actual: '{self.estado}'.")
             return False
-
-        # Cambiamos el estado a finalizada
-        self.__estado = "finalizada"
-
-        # Registramos automáticamente la fecha y hora de cierre
-        self.__fecha_cierre = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        print(f"Negociación #{self.__id_negociacion} finalizada. "
-              f"Precio acordado: ${self.__precio_final} | Cierre: {self.__fecha_cierre}")
+        self.estado = "finalizada"
+        self.fecha_cierre = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"Negociación #{self.id_negociacion} finalizada. Precio: ${self.precio_final}")
+        self.notificar_observadores("finalizada")
         return True
 
     def cancelar_negociacion(self):
-        """
-        Cancela la negociación si no se llegó a un acuerdo.
-        Se puede cancelar desde cualquier estado activo.
-        Retorna True si se canceló correctamente.
-        """
-        # No tiene sentido cancelar algo que ya terminó
-        if self.__estado in ("finalizada", "cancelada"):
-            print(f"La negociación ya está '{self.__estado}', no se puede cancelar.")
+        if self.estado in ("finalizada", "cancelada"):
+            print(f"La negociación ya está '{self.estado}', no se puede cancelar.")
             return False
-
-        # Cambiamos el estado a cancelada
-        self.__estado = "cancelada"
-
-        # Registramos la fecha de cancelación
-        self.__fecha_cierre = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        print(f"Negociación #{self.__id_negociacion} cancelada.")
+        self.estado = "cancelada"
+        self.fecha_cierre = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"Negociación #{self.id_negociacion} cancelada.")
+        self.notificar_observadores("cancelada")
         return True
 
     def __str__(self):
-        # Representación legible de la negociación cuando se imprime con print()
-        return (f"Negociación #{self.__id_negociacion} | "
-                f"Estado: {self.__estado} | "
-                f"Precio: ${self.__precio_final} | "
-                f"Inicio: {self.__fecha_inicio} | "
-                f"Cierre: {self.__fecha_cierre or 'En curso'}")
+        return (f"Negociación #{self.id_negociacion} | Estado: {self.estado} | "
+                f"Precio: ${self.precio_final}")
+
+
+# ---------- Observadores concretos ----------
+
+class NotificacionSimple2:
+    """Versión mínima de Notificacion, solo para esta demo."""
+
+    def __init__(self, mensaje, destinatario):
+        self.mensaje = mensaje
+        self.destinatario = destinatario
+
+    def enviar(self):
+        print(f"Notificación enviada a '{self.destinatario}': {self.mensaje}")
+        return True
+
+
+class ObservadorCiudadano(ObservadorNegociacion):
+    """Observador concreto que representa al ciudadano (vendedor)."""
+
+    def __init__(self, nombre, peso_kg, tipo_material):
+        self.nombre = nombre
+        self.peso_kg = peso_kg
+        self.tipo_material = tipo_material
+
+    def actualizar(self, negociacion, evento):
+        if evento == "finalizada":
+            mensaje = (f"Vendiste {self.peso_kg}kg de '{self.tipo_material}' "
+                       f"por ${negociacion.precio_final}.")
+            NotificacionSimple2(mensaje, self.nombre).enviar()
+        elif evento == "cancelada":
+            NotificacionSimple2(
+                f"Tu negociación #{negociacion.id_negociacion} fue cancelada.",
+                self.nombre
+            ).enviar()
+
+
+class ObservadorReciclador(ObservadorNegociacion):
+    """Observador concreto que representa al reciclador (comprador)."""
+
+    def __init__(self, nombre, peso_kg, tipo_material):
+        self.nombre = nombre
+        self.peso_kg = peso_kg
+        self.tipo_material = tipo_material
+
+    def actualizar(self, negociacion, evento):
+        if evento == "finalizada":
+            mensaje = (f"Compraste {self.peso_kg}kg de '{self.tipo_material}' "
+                       f"por ${negociacion.precio_final}.")
+            NotificacionSimple2(mensaje, self.nombre).enviar()
+        elif evento == "cancelada":
+            NotificacionSimple2(
+                f"La negociación #{negociacion.id_negociacion} fue cancelada.",
+                self.nombre
+            ).enviar()
+
+
+class ObservadorAuditoria(ObservadorNegociacion):
+    """Módulo de auditoría interno que registra todos los eventos."""
+
+    def __init__(self):
+        self.registro = []
+
+    def actualizar(self, negociacion, evento):
+        entrada = f"[AUDITORÍA] Negociación #{negociacion.id_negociacion} -> evento: {evento}"
+        self.registro.append(entrada)
+        print(entrada)
+
+
+def realizar_intercambio_con_patron(ciudadano, reciclador, tipo_material, peso_kg, precio,
+                                    con_auditoria=False):
+    """Simula el método del Facade usando Observer."""
+    negociacion = Negociacion(
+        id_negociacion="NEG-002",
+        precio_final=precio,
+        estado="pendiente",
+        fecha_inicio=datetime.now().strftime("%Y-%m-%d"),
+    )
+
+    negociacion.suscribir(ObservadorCiudadano(ciudadano, peso_kg, tipo_material))
+    negociacion.suscribir(ObservadorReciclador(reciclador, peso_kg, tipo_material))
+
+    if con_auditoria:
+        negociacion.suscribir(ObservadorAuditoria())
+
+    negociacion.iniciar_negociacion()
+    negociacion.finalizar_negociacion()
+
+    return negociacion
+
