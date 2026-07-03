@@ -239,20 +239,10 @@ class ReciGanaFacade:
             fecha_inicio=fecha_hoy
         )
         negociacion.iniciar_negociacion()
-        # Paso 1: crear y finalizar la negociación (módulo materiales)
-        fecha_hoy = datetime.now().strftime("%Y-%m-%d")
-        negociacion = Negociacion(
-            id_negociacion=f"NEG-{fecha_hoy}-{ciudadano.nombre[:3].upper()}",
-            precio_final=precio,
-            estado="pendiente",
-            fecha_inicio=fecha_hoy
-        )
-        negociacion.iniciar_negociacion()
         
         negociacion.suscribir(ObservadorCiudadano(ciudadano.nombre, peso_kg, tipo_material))
         negociacion.suscribir(ObservadorReciclador(reciclador.nombre, peso_kg, tipo_material))
 
-        negociacion.finalizar_negociacion()
         negociacion.finalizar_negociacion()
  
         # Paso 2: registrar en el historial del ciudadano
