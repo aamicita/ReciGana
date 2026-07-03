@@ -141,5 +141,5 @@ class Notificacion:
         if self.__leida:
             estado = "Leida"
         else:
-            estado = "No leída"
+            estado = "No leida"
         return f"[{estado}] {self.__fecha_creacion} | {self.__mensaje}"
