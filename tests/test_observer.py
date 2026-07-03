@@ -1,10 +1,15 @@
 from src.materiales.negociacion import Negociacion, ObservadorCiudadano, ObservadorReciclador, ObservadorAuditoria
 
+# Creamos clases ficticias de Ciudadano y Reciclador solo para que el test funcione sin romper nada
+class MockUsuario:
+    def __init__(self, nombre):
+        self.nombre = nombre
+
 def test_patron_observer_notificaciones_exitosas():
     # 1. Crear la negociación en estado pendiente
     negociacion = Negociacion("TEST-OBS-01", 50.0, "pendiente", "2026-07-03")
     
-    # 2. Instanciar y suscribir los observadores
+    # 2. Instanciar y suscribir los observadores reales
     obs_ciudadano = ObservadorCiudadano("María", 10.0, "Plástico")
     obs_reciclador = ObservadorReciclador("Juan", 10.0, "Plástico")
     obs_auditoria = ObservadorAuditoria()
@@ -26,6 +31,6 @@ def test_patron_observer_cancelacion():
     obs_ciudadano = ObservadorCiudadano("María", 5.0, "Cartón")
     
     negociacion.suscribir(obs_ciudadano)
-    negociacion.iniciar_negociacion()
+    assert negociacion.iniciar_negociacion() is True
     assert negociacion.cancelar_negociacion() is True
     assert negociacion.estado == "cancelada"
