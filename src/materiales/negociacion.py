@@ -101,7 +101,15 @@ class Negociacion(SujetoObservable):
         print(f"Negociación #{self.id_negociacion} cancelada.")
         self.notificar_observadores("cancelada")
         return True
-
+    
+    def proponer_contra_oferta(self, nuevo_precio):
+        if self.estado != "iniciada":
+            print(f"No se puede proponer contraoferta en estado '{self.estado}'.")
+            return False
+        self.precio_final = nuevo_precio
+        print(f"Nueva contraoferta propuesta para #{self.id_negociacion}: ${self.precio_final}")
+        return True
+    
     def __str__(self):
         return (f"Negociación #{self.id_negociacion} | Estado: {self.estado} | "
                 f"Precio: ${self.precio_final}")
