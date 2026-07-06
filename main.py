@@ -8,6 +8,10 @@ from src.usuarios import Administrador, Ciudadano, Reciclador
 from src.usuarios import GestorSistema
 from src.usuarios import FabricaUsuariosManta
 
+#importamos clase de adaptador
+from src.adaptadores.adaptador_usuario import AdaptadorUsuarioBackend
+
+
 # Importamos las clases de materiales
 from src.materiales import MaterialBase
 from src.materiales.fabrica_materiales import FabricaMateriales
@@ -18,6 +22,13 @@ from src.materiales.negociacion import Negociacion
 from src.comunicaciones import Notificacion, Reporte, HistorialDeReciclaje, Calificacion
 from src.comunicaciones import ReporteBuilder
 from src.comunicaciones.canal_envio import CanalEmailSimulado     #inyecccion de dependencias
+
+class UsuarioDBFalso:
+    def __init__(self, id, nombre, email, ciudad):
+        self.id = id
+        self.nombre = nombre
+        self.email = email
+        self.ciudad = ciudad
 
 def main():
     """
@@ -218,6 +229,18 @@ def main():
         # Solo se puede marcar como leída una vez
         notificacion.marcar_como_leida()
 
+        #DEMO: INYECCION DE DEPENDENCIAS
+        print("\n--- Demostrando inyección de dependencias (canal de envío) ---")
+        notif_email = Notificacion("NOT1-B", "Tienes una nueva oferta", "Luis",
+                                    canal_envio=CanalEmailSimulado())
+        notif_email.enviar()   # Se "envía" simulando un correo, no un print plano
+
+        #DEMO: ADAPTER
+        print("\n--- Adaptando un usuario del backend al dominio POO ---")
+        usuario_backend = UsuarioDBFalso(99, "Sofía", "sofia@correo.com", "Manta")
+        ciudadano_adaptado = AdaptadorUsuarioBackend.a_ciudadano(usuario_backend)
+        print(ciudadano_adaptado)
+        
         # ===== PASO 10: HISTORIAL DE RECICLAJE =====
         print("\n--- Registrando historial ---")
 
