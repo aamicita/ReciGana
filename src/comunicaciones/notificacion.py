@@ -1,9 +1,13 @@
-# Clase de notificación del sistema ReciGana
 # Se usa para avisar a los usuarios sobre eventos importantes
 # Ejemplo: "Tu oferta fue aceptada", "Nuevo material disponible"
 
 from datetime import datetime  # Para registrar cuándo se creó la notificación
 import copy                    # Para poder clonar notificaciones (Patrón Prototype)
+
+# INYECCIÓN DE DEPENDENCIAS: importamos la interfaz y el canal por
+# defecto. Notificacion ya no decide "cómo" enviar, solo delega
+# ese trabajo al canal que le inyecten.
+from src.comunicaciones.canal_envio import CanalEnvio, CanalConsola
 
 
 class Notificacion:
@@ -13,7 +17,20 @@ class Notificacion:
     cuando el usuario las ve.
     """
 
-    def __init__(self, id_notificacion, mensaje, destinatario=None):
+    def __init__(self, id_notificacion, mensaje, destinatario=None,
+                 canal_envio: CanalEnvio = None):
+        """
+        Parámetro nuevo:
+            canal_envio -- objeto que sabe CÓMO enviar el mensaje
+                           (CanalConsola, CanalEmailSimulado, etc.)
+
+        INYECCIÓN DE DEPENDENCIAS:
+        Si no nos pasan ningún canal, usamos CanalConsola() por
+        defecto para que TODO el código viejo (y los tests que ya
+        existen) siga funcionando exactamente igual que antes.
+        Si nos inyectan otro canal, Notificacion lo usa sin
+        necesitar saber nada de cómo funciona por dentro.
+        """
         # Guardamos el identificador único de esta notificación
         self.__id_notificacion = id_notificacion
 
@@ -32,6 +49,11 @@ class Notificacion:
 
         # Registramos automáticamente la fecha y hora exacta de creación
         self.__fecha_creacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # DEPENDENCIA INYECTADA: si no llega ninguna, usamos consola
+        # por defecto. Esto se llama "inyección con valor por defecto"
+        # y es una práctica común para no romper código existente.
+        self.__canal = canal_envio if canal_envio is not None else CanalConsola()
 
     # ---------- Propiedades ----------
     # Las propiedades permiten leer los atributos privados desde fuera
@@ -67,15 +89,30 @@ class Notificacion:
     def enviar(self):
         """
         Envía la notificación al destinatario.
+
+        INYECCIÓN DE DEPENDENCIAS: ya no imprimimos directamente
+        aquí. Delegamos el "cómo enviar" al canal que nos inyectaron
+        en el constructor (self.__canal). Notificacion ya no sabe
+        ni le importa si eso es una consola, un email o un SMS.
+
         Retorna True para confirmar que el envío fue exitoso.
         """
-        # Verificamos si hay un destinatario específico
-        if self.__destinatario:
-            print(f"Notificación enviada a '{self.__destinatario}': {self.__mensaje}")
-        else:
-            print(f"Notificación enviada: {self.__mensaje}")
+        return self.__canal.enviar(self.__destinatario, self.__mensaje)
 
-        return True
+    def cambiar_canal(self, nuevo_canal: CanalEnvio):
+        """
+        INYECCIÓN DE DEPENDENCIAS (setter injection):
+        Permite cambiar el canal de envío DESPUÉS de creada la
+        notificación, sin tener que crear un objeto nuevo.
+
+        Ejemplo:
+            notif = Notificacion(1, "Hola", "María")
+            notif.cambiar_canal(CanalEmailSimulado())
+            notif.enviar()  # ahora se envía simulando un email
+        """
+        if not isinstance(nuevo_canal, CanalEnvio):
+            raise ValueError("El canal debe implementar la interfaz CanalEnvio.")
+        self.__canal = nuevo_canal
 
     def marcar_como_leida(self):
         """
