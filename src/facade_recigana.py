@@ -1,6 +1,4 @@
-
-# PATRÓN FACADE — ReciGanaFacade
-
+# PATRÓN FACADE 
 # ¿Qué patrón es este?
 
 # FACADE (Fachada): proporciona una interfaz SIMPLE y unificada
@@ -20,11 +18,12 @@ from src.usuarios.ciudadano import Ciudadano
 from src.usuarios.reciclador import Reciclador
 from src.usuarios.gestor_sistema import GestorSistema
 from src.materiales.fabrica_materiales import FabricaMateriales
-from src.materiales.negociacion import Negociacion, ObservadorCiudadano, ObservadorReciclador
+from src.materiales.negociacion import Negociacion
 from src.materiales.oferta_de_venta import OfertaDeVenta
 from src.comunicaciones.notificacion import Notificacion
 from src.comunicaciones.historial_de_reciclaje import HistorialDeReciclaje
 from src.comunicaciones.reporte import Reporte
+from src.comunicaciones.canal_envio import CanalEnvio, CanalConsola
 from datetime import datetime
  
  
@@ -54,13 +53,36 @@ class ReciGanaFacade:
         facade.publicar_material(ciudadano, "plastico", 10.0)
     """
  
-    def __init__(self):
+    def __init__(self, canal_notificaciones: CanalEnvio = None):
+        """
+        INYECCIÓN DE DEPENDENCIAS:
+        El Facade recibe (en vez de crear internamente) el canal
+        por el que se van a enviar TODAS las notificaciones del
+        sistema. Si no se especifica ninguno, usa CanalConsola()
+        por defecto, así el código existente sigue funcionando
+        igual que antes.
+
+        Esto permite, por ejemplo, levantar el sistema en modo
+        "consola" para pruebas y en modo "email" en producción,
+        sin cambiar ni una sola línea de ReciGanaFacade,
+        Notificacion, ni del resto del sistema.
+
+        Ejemplo de uso:
+            facade_pruebas = ReciGanaFacade()
+            facade_produccion = ReciGanaFacade(CanalEmailSimulado())
+        """
         # La Facade usa el GestorSistema (Singleton) internamente.
         # El cliente no necesita saber que existe GestorSistema.
         self.__gestor = GestorSistema.obtener_instancia()
  
         # Contador interno para generar IDs de notificaciones
         self.__contador_notificaciones = 1
+
+        # DEPENDENCIA INYECTADA: canal de notificaciones del sistema
+        self.__canal_notificaciones = (
+            canal_notificaciones if canal_notificaciones is not None
+            else CanalConsola()
+        )
  
         print("[Facade] ReciGanaFacade inicializada y lista para usar.")
  
@@ -239,10 +261,6 @@ class ReciGanaFacade:
             fecha_inicio=fecha_hoy
         )
         negociacion.iniciar_negociacion()
-        
-        negociacion.suscribir(ObservadorCiudadano(ciudadano.nombre, peso_kg, tipo_material))
-        negociacion.suscribir(ObservadorReciclador(reciclador.nombre, peso_kg, tipo_material))
-
         negociacion.finalizar_negociacion()
  
         # Paso 2: registrar en el historial del ciudadano
@@ -267,8 +285,7 @@ class ReciGanaFacade:
             tipo_transaccion="compra"
         )
  
-        #COMENTADO PORQUE DESPUES ENVIA NOTIFICACION A USUARIOS 2 VECES
-        """# Paso 4: notificar al ciudadano (módulo comunicaciones)
+        # Paso 4: notificar al ciudadano (módulo comunicaciones)
         self.__enviar_notificacion(
             destinatario=ciudadano.nombre,
             mensaje=(
@@ -301,7 +318,7 @@ class ReciGanaFacade:
             f"[Facade] Intercambio completado exitosamente. "
             f"Negociacion estado: {negociacion.estado}"
         )
-        return resumen """
+        return resumen
  
     # ==========================================================
     # SECCIÓN 4: OPERACIONES DE CONSULTA
@@ -376,11 +393,14 @@ class ReciGanaFacade:
         notif = Notificacion(
             id_notificacion=self.__contador_notificaciones,
             mensaje=mensaje,
-            destinatario=destinatario
+            destinatario=destinatario,
+            # Le pasamos al objeto Notificacion el MISMO canal que
+            # el Facade recibió inyectado. Ninguna de las dos clases
+            # tiene que "saber" si eso es consola, email o SMS.
+            canal_envio=self.__canal_notificaciones
         )
         notif.enviar()
  
         # Incrementamos el contador para el próximo ID
         self.__contador_notificaciones += 1
         return notif
- 
