@@ -17,6 +17,7 @@ from src.materiales.negociacion import Negociacion
 # Importamos las clases de comunicaciones
 from src.comunicaciones import Notificacion, Reporte, HistorialDeReciclaje, Calificacion
 from src.comunicaciones import ReporteBuilder
+from src.comunicaciones.canal_envio import CanalEmailSimulado     #inyecccion de dependencias
 
 def main():
     """
