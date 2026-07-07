@@ -22,6 +22,12 @@
 
 from abc import ABC, abstractmethod
 
+# POLIMORFISMO CON INTERFAZ 
+# A diferencia de MaterialBase (que es clase abstracta con estado
+# compartido: ESTADOS_VALIDOS, validaciones en __init__), CanalEnvio
+# es una interfaz PURA: solo define el contrato enviar(), sin ningún
+# atributo ni lógica compartida. CanalConsola, CanalEmailSimulado y
+# CanalSMSSimulado implementan ese mismo contrato cada una a su manera.
 
 class CanalEnvio(ABC):
     """
