@@ -25,6 +25,16 @@ class Plastico(MaterialBase):
         return categoria
 
     def calcular_valor(self, precio_por_kg: float = None) -> float:
+        """
+        SOBRECARGA SIMULADA 
+        Python no permite dos métodos con el mismo nombre y distinta
+        firma como en Java. Para lograr un efecto parecido, usamos un
+        parámetro con valor por defecto:
+            material.calcular_valor()      -> usa el precio base
+            material.calcular_valor(0.80)  -> usa el precio que le pases
+        Las demás clases de material (Vidrio, Metal, Papel, Cartón,
+        Orgánico) siguen exactamente este mismo patrón.
+        """
         precio = precio_por_kg if precio_por_kg else self.PRECIO_BASE
 
         if not isinstance(precio, (int, float)) or precio <= 0:
