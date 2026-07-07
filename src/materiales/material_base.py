@@ -1,5 +1,11 @@
 from abc import ABC, abstractmethod
 
+# ABSTRACCIÓN
+# MaterialBase define QUÉ debe hacer todo material (clasificar,
+# calcular_valor, get_tipo) sin decir CÓMO. Es un "contrato".
+# No se puede escribir MaterialBase(...) directamente porque tiene
+# métodos abstractos sin implementar — Python lo prohíbe.
+# Cada subclase concreta (Plastico, Vidrio, Metal, etc.) sí dice el "cómo".
 
 class MaterialBase(ABC):
 
@@ -112,7 +118,13 @@ class MaterialBase(ABC):
     # ======================================================
     # MÉTODOS ABSTRACTOS
     # ======================================================
-
+# POLIMORFISMO CON CLASE ABSTRACTA 
+    # Cada subclase de MaterialBase implementa clasificar() DIFERENTE,
+    # aunque se llama igual y se invoca igual:
+    #   Plastico().clasificar()  -> "Reciclable seco"
+    #   Organico().clasificar()  -> "Biodegradable"
+    # Quien llama a clasificar() no necesita saber qué subclase es.
+    
     @abstractmethod
     def clasificar(self) -> str:
         pass
