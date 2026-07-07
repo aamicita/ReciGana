@@ -14,16 +14,23 @@ class Reporte:
     TIPOS_VALIDOS = {"ventas", "usuarios", "materiales", "ofertas"}
 
     def __init__(self, id_reporte, fecha, tipo_reporte, contenido):
-        # Identificador único del reporte
-        self.__id_reporte = id_reporte
+        # ENCAPSULAMIENTO (Unidad 1.4):
+        # id_reporte y fecha usan UN solo guion bajo (protegido, no privado)
+        # porque nunca cambian después de creados y no tienen setter que
+        # proteger. Usar doble guion bajo aquí sería encapsulamiento
+        # innecesario. En cambio, __contenido y __generado sí siguen
+        # con doble guion bajo más abajo, porque esos SÍ necesitan
+        # protección real (contenido se valida, generado no debe cambiar
+        # de estado dos veces).
+        self._id_reporte = id_reporte
 
         # Fecha del período que cubre el reporte (ej: "2024-01-15")
-        self.__fecha = fecha
-
+        self._fecha = fecha
+        
         # Validamos que el tipo de reporte sea uno de los permitidos
         if tipo_reporte not in self.TIPOS_VALIDOS:
             raise ValueError(f"Tipo de reporte inválido. Use uno de: {self.TIPOS_VALIDOS}")
-        self.__tipo_reporte = tipo_reporte
+        self._tipo_reporte = tipo_reporte
 
         # Contenido del reporte: diccionario con los datos a reportar
         if not isinstance(contenido, dict):
@@ -41,17 +48,17 @@ class Reporte:
     @property
     def id_reporte(self):
         # Retorna el identificador del reporte
-        return self.__id_reporte
+        return self._id_reporte
 
     @property
     def fecha(self):
         # Retorna la fecha del período reportado
-        return self.__fecha
+        return self._fecha
 
     @property
     def tipo_reporte(self):
         # Retorna el tipo de reporte (ventas, usuarios, etc.)
-        return self.__tipo_reporte
+        return self._tipo_reporte
 
     @property
     def contenido(self):
@@ -81,7 +88,7 @@ class Reporte:
 
         # Mostramos el encabezado del reporte
         print(f"===== REPORTE DE {self.__tipo_reporte.upper()} =====")
-        print(f"Fecha del período : {self.__fecha}")
+        print(f"Fecha del período : {self._fecha}")
         print(f"Generado el       : {self.__fecha_generacion}")
         print("Datos:")
 
@@ -104,7 +111,7 @@ class Reporte:
             return None
 
         # Creamos el nombre del archivo con el tipo y la fecha
-        nombre_archivo = f"reporte_{self.__tipo_reporte}_{self.__fecha}.pdf"
+        nombre_archivo = f"reporte_{self._tipo_reporte}_{self._fecha}.pdf"
 
         print(f"Reporte exportado como: {nombre_archivo}")
         return nombre_archivo
@@ -112,4 +119,4 @@ class Reporte:
     def __str__(self):
         # Representación legible del reporte cuando se imprime con print()
         estado = "Generado" if self.__generado else "Pendiente"
-        return f"Reporte #{self.__id_reporte} | Tipo: {self.__tipo_reporte} | Fecha: {self.__fecha} | Estado: {estado}"
+        return f"Reporte #{self.__id_reporte} | Tipo: {self._tipo_reporte} | Fecha: {self._fecha} | Estado: {estado}"
