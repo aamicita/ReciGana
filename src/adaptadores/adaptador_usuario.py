@@ -39,6 +39,10 @@
 # necesariamente una clase concreta.
 # ============================================================
 
+
+# RELACIÓN DE DEPENDENCIA 
+# AdaptadorUsuarioBackend necesita a Ciudadano solo para construirlo
+# dentro de sus métodos, no lo guarda como atributo permanente.
 from src.usuarios.ciudadano import Ciudadano
 
 

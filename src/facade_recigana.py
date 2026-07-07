@@ -227,6 +227,11 @@ class ReciGanaFacade:
     # Sin Facade involucra 5+ clases de 3 módulos distintos.
     # ==========================================================
  
+ 
+ # RELACIÓN DE ASOCIACIÓN 
+    # ReciGanaFacade recibe objetos Ciudadano/Reciclador ya creados
+    # como parámetro — los usa, pero no los posee ni los crea.
+    
     def registrar_intercambio(self, ciudadano, reciclador,
                                tipo_material, peso_kg, precio):
         """

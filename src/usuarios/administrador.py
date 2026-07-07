@@ -14,7 +14,11 @@ class Administrador(Usuarios):
         # Llamamos al constructor padre asignando rol "administrador"
         # Esto le da permisos especiales dentro del sistema
         super().__init__(id_usuario, nombre, telefono, correo, contrasenia, rol="administrador")
-
+        
+# RELACIÓN DE COMPOSICIÓN 
+        # Administrador "posee" estas listas — nacen y mueren con él,
+        # no se comparten con otra clase.
+        
         # Lista interna de usuarios registrados en la plataforma
         self._usuarios = []
 
