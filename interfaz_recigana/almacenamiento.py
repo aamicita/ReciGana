@@ -200,7 +200,13 @@ def obtener_publicaciones():
 
 
 def guardar_publicacion(ciudadano_correo, ciudadano_nombre, tipo_material,
-                         peso_kg, foto, descripcion):
+                         peso_kg, foto, descripcion, precio_esperado=None):
+    """
+    precio_esperado es OPCIONAL: el ciudadano puede sugerir un precio
+    de referencia (como en Mercado Libre), pero el reciclador sigue
+    pudiendo ofertar un valor distinto. Si no se especifica, queda
+    en None y simplemente no se muestra ese dato en las tarjetas.
+    """
     publicaciones = obtener_publicaciones()
     nueva = {
         "id": _siguiente_id(publicaciones),
@@ -210,6 +216,7 @@ def guardar_publicacion(ciudadano_correo, ciudadano_nombre, tipo_material,
         "peso_kg": peso_kg,
         "foto": foto,
         "descripcion": descripcion,
+        "precio_esperado": precio_esperado,
         "estado": "disponible",   # disponible -> negociacion -> vendido
         "fecha_publicacion": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "ofertas": [],

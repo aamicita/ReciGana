@@ -3,22 +3,34 @@
 app_recigana.py
 ================
 Interfaz gráfica de ReciGana hecha con Tkinter (viene incluido con Python,
-no requiere instalar nada más).
+no requiere instalar nada más, EXCEPTO Pillow para poder mostrar las fotos
+de los materiales -> pip install Pillow
 
 Cómo ejecutar:
     python app_recigana.py
 
-Estructura de pantallas:
-    Principal
+Estructura de pantallas (ACTUALIZADA):
+    Login unificado (pantalla de inicio, elige rol con radiobuttons)
+      ├── Recuperar contraseña
       ├── Registrarse
-      │     ├── Registro Ciudadano
-      │     └── Registro Reciclador
-      ├── Iniciar sesión
-      │     └── Recuperar contraseña
+      │     ├── Registro Ciudadano  -> al terminar, va a Login unificado
+      │     └── Registro Reciclador -> al terminar, va a Login unificado
       ├── Dashboard Ciudadano   (una vez logueado)
+      │     └── Chat (con un reciclador, sobre una publicación con oferta aceptada)
       └── Dashboard Reciclador  (una vez logueado)
+            └── Chat (con un ciudadano, sobre una publicación con oferta aceptada)
 
-Todos los datos se guardan en la carpeta 'data/' en archivos JSON
+CAMBIO: ya no existe la pantalla "principal" (con REGISTRARSE / INICIAR
+SESIÓN / SALIR). La aplicación abre directo en el login unificado, y al
+cerrar sesión también se vuelve a esa misma pantalla.
+
+CAMBIO: el chat ya NO se abre en una ventana aparte (Toplevel), porque en
+Windows a veces esas ventanas no reciben el foco del teclado correctamente.
+Ahora el chat es una pantalla más DENTRO de la misma ventana principal,
+igual que "Publicar material" o "Mis publicaciones". Solo es visible una
+vez que el usuario ya inició sesión.
+
+Todos los datos se guardan en la carpeta 'data/' en archivos CSV/JSON
 separados por rol (ver almacenamiento.py).
 """
 
@@ -26,6 +38,8 @@ import re
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from datetime import datetime
+
+from PIL import Image, ImageTk
 
 import almacenamiento as datos
 from estilos import obtener_tema, FUENTE_TITULO, FUENTE_SUBTITULO, FUENTE_SECCION, \
@@ -52,7 +66,8 @@ class ReciGanaApp(tk.Tk):
         self.contenedor = tk.Frame(self)
         self.contenedor.pack(fill="both", expand=True)
 
-        self.mostrar_principal()
+        # La app abre directo en el login unificado (ya no hay pantalla "principal")
+        self.mostrar_login_unificado()
 
     # ------------------------------------------------------------
     # Utilidad: limpia el contenedor antes de dibujar una pantalla nueva
@@ -133,46 +148,6 @@ class ReciGanaApp(tk.Tk):
                       bg=padre["bg"], fg=t["texto_claro"]).pack(pady=(0, 10))
 
     # ==============================================================
-    # PANTALLA PRINCIPAL
-    # ==============================================================
-    def mostrar_principal(self):
-        self._limpiar()
-        t = self.tema()
-        self.usuario_actual = None
-        self.rol_actual = None
-
-        fondo = tk.Frame(self.contenedor, bg=t["bg_principal"])
-        fondo.pack(fill="both", expand=True)
-
-        # Botón modo oscuro arriba a la derecha
-        barra_top = tk.Frame(fondo, bg=t["bg_principal"])
-        barra_top.pack(fill="x")
-        icono = "☀ Modo claro" if self.modo_oscuro else "🌙 Modo oscuro"
-        tk.Button(barra_top, text=icono, command=self._alternar_modo_oscuro,
-                  relief="flat", bg=t["bg_principal"], fg=t["primario"],
-                  font=("Segoe UI", 10, "bold"), cursor="hand2"
-                  ).pack(anchor="ne", padx=20, pady=15)
-
-        centro = tk.Frame(fondo, bg=t["bg_principal"])
-        centro.pack(expand=True)
-
-        tk.Label(centro, text="♻ ReciGana", font=FUENTE_TITULO,
-                  bg=t["bg_principal"], fg=t["primario"]).pack(pady=(10, 6))
-        tk.Label(centro, text="¡Recicla, gana y ayuda al planeta!",
-                  font=FUENTE_SUBTITULO, bg=t["bg_principal"],
-                  fg=t["texto_claro"]).pack(pady=(0, 40))
-
-        self._boton(centro, "REGISTRARSE", self.mostrar_seleccion_registro, ancho=26).pack(pady=8)
-        self._boton(centro, "INICIAR SESIÓN", self.mostrar_seleccion_login,
-                    color=t["secundario"], hover=t["primario"], ancho=26).pack(pady=8)
-        self._boton(centro, "SALIR", self.destroy, color=t["error"],
-                    hover="#8E0000", ancho=26).pack(pady=8)
-
-    def _alternar_modo_oscuro(self):
-        self.modo_oscuro = not self.modo_oscuro
-        self.mostrar_principal()
-
-    # ==============================================================
     # SELECCIÓN DE TIPO DE USUARIO PARA REGISTRO
     # ==============================================================
     def mostrar_seleccion_registro(self):
@@ -190,7 +165,7 @@ class ReciGanaApp(tk.Tk):
         self._boton(centro, "🙋 Soy Ciudadano", self.mostrar_registro_ciudadano, ancho=28).pack(pady=10)
         self._boton(centro, "♻ Soy Reciclador", self.mostrar_registro_reciclador,
                     color=t["secundario"], hover=t["primario"], ancho=28).pack(pady=10)
-        self._boton(centro, "← Volver", self.mostrar_principal, color=t["texto_claro"],
+        self._boton(centro, "← Volver", self.mostrar_login_unificado, color=t["texto_claro"],
                     hover=t["texto"], ancho=28).pack(pady=(30, 10))
 
     # ==============================================================
@@ -242,7 +217,7 @@ class ReciGanaApp(tk.Tk):
 
             datos.guardar_ciudadano(nombres, apellidos, ciudad, correo, clave)
             messagebox.showinfo("¡Listo!", f"Ciudadano '{nombres}' registrado exitosamente.\nYa puedes iniciar sesión.")
-            self.mostrar_seleccion_login()
+            self.mostrar_login_unificado()
 
         botones = tk.Frame(panel, bg=t["bg_panel"])
         botones.pack(pady=25)
@@ -301,7 +276,7 @@ class ReciGanaApp(tk.Tk):
 
             datos.guardar_reciclador(nombres, apellidos, ciudad, zona, correo, clave)
             messagebox.showinfo("¡Listo!", f"Reciclador '{nombres}' registrado exitosamente.\nYa puedes iniciar sesión.")
-            self.mostrar_seleccion_login()
+            self.mostrar_login_unificado()
 
         botones = tk.Frame(panel, bg=t["bg_panel"])
         botones.pack(pady=25)
@@ -310,41 +285,51 @@ class ReciGanaApp(tk.Tk):
                     color=t["texto_claro"], hover=t["texto"], ancho=24).pack(pady=6)
 
     # ==============================================================
-    # SELECCIÓN DE ROL PARA INICIAR SESIÓN
+    # LOGIN UNIFICADO
+    # Es la PANTALLA DE INICIO de toda la aplicación, y también
+    # a donde se regresa al cerrar sesión.
     # ==============================================================
-    def mostrar_seleccion_login(self):
+    def mostrar_login_unificado(self):
         self._limpiar()
         t = self.tema()
+        self.usuario_actual = None
+        self.rol_actual = None
+
         fondo = tk.Frame(self.contenedor, bg=t["bg_principal"])
         fondo.pack(fill="both", expand=True)
 
-        centro = tk.Frame(fondo, bg=t["bg_principal"])
-        centro.pack(expand=True)
+        # Botón pequeño de modo oscuro arriba a la derecha
+        barra_top = tk.Frame(fondo, bg=t["bg_principal"])
+        barra_top.pack(fill="x")
+        icono = "☀ Modo claro" if self.modo_oscuro else "🌙 Modo oscuro"
+        tk.Button(barra_top, text=icono, command=self._alternar_modo_oscuro,
+                  relief="flat", bg=t["bg_principal"], fg=t["primario"],
+                  font=("Segoe UI", 10, "bold"), cursor="hand2"
+                  ).pack(anchor="ne", padx=20, pady=15)
 
-        tk.Label(centro, text="Inicia sesión como:", font=FUENTE_SECCION,
-                  bg=t["bg_principal"], fg=t["primario"]).pack(pady=(0, 30))
+        tk.Label(fondo, text="♻ ReciGana", font=FUENTE_TITULO,
+                  bg=t["bg_principal"], fg=t["primario"]).pack(pady=(10, 4))
+        tk.Label(fondo, text="¡Recicla, gana y ayuda al planeta!",
+                  font=FUENTE_SUBTITULO, bg=t["bg_principal"],
+                  fg=t["texto_claro"]).pack(pady=(0, 20))
 
-        self._boton(centro, "🙋 Ciudadano", lambda: self.mostrar_login("ciudadano"), ancho=28).pack(pady=10)
-        self._boton(centro, "♻ Reciclador", lambda: self.mostrar_login("reciclador"),
-                    color=t["secundario"], hover=t["primario"], ancho=28).pack(pady=10)
-        self._boton(centro, "← Volver", self.mostrar_principal, color=t["texto_claro"],
-                    hover=t["texto"], ancho=28).pack(pady=(30, 10))
-
-    # ==============================================================
-    # INICIAR SESIÓN
-    # ==============================================================
-    def mostrar_login(self, rol):
-        self._limpiar()
-        t = self.tema()
-        fondo = tk.Frame(self.contenedor, bg=t["bg_principal"])
-        fondo.pack(fill="both", expand=True)
-
-        panel = tk.Frame(fondo, bg=t["bg_panel"], padx=40, pady=10,
+        panel = tk.Frame(fondo, bg=t["bg_panel"], padx=40, pady=20,
                           highlightbackground=t["borde"], highlightthickness=1)
-        panel.place(relx=0.5, rely=0.5, anchor="center")
+        panel.pack()
 
-        icono = "🙋" if rol == "ciudadano" else "♻"
-        self._encabezado_pantalla(panel, f"{icono} Iniciar sesión — {rol.capitalize()}")
+        self._encabezado_pantalla(panel, "Iniciar sesión")
+
+        tk.Label(panel, text="Soy:", font=FUENTE_ETIQUETA,
+                  bg=t["bg_panel"], fg=t["texto"]).pack(anchor="w", pady=(5, 2))
+        rol_var = tk.StringVar(value="ciudadano")
+        fila_rol = tk.Frame(panel, bg=t["bg_panel"])
+        fila_rol.pack(anchor="w", pady=(0, 5))
+        tk.Radiobutton(fila_rol, text="🙋 Ciudadano", variable=rol_var, value="ciudadano",
+                        bg=t["bg_panel"], fg=t["texto"], selectcolor=t["bg_panel"],
+                        font=FUENTE_NORMAL, activebackground=t["bg_panel"]).pack(side="left", padx=(0, 15))
+        tk.Radiobutton(fila_rol, text="♻ Reciclador", variable=rol_var, value="reciclador",
+                        bg=t["bg_panel"], fg=t["texto"], selectcolor=t["bg_panel"],
+                        font=FUENTE_NORMAL, activebackground=t["bg_panel"]).pack(side="left")
 
         e_correo = self._campo_texto(panel, "Correo electrónico")
         e_pass = self._campo_contrasenia(panel, "Contraseña")
@@ -357,11 +342,12 @@ class ReciGanaApp(tk.Tk):
                                    font=("Segoe UI", 9, "underline"),
                                    bg=t["bg_panel"], fg=t["primario"], cursor="hand2")
         enlace_olvido.pack(pady=(6, 0))
-        enlace_olvido.bind("<Button-1>", lambda e: self.mostrar_recuperar_contrasenia(rol))
+        enlace_olvido.bind("<Button-1>", lambda e: self.mostrar_recuperar_contrasenia(rol_var.get()))
 
         def iniciar_sesion():
             correo = e_correo.get().strip()
             clave = e_pass.get()
+            rol = rol_var.get()
 
             if not correo or not clave:
                 etiqueta_error.config(text="Debes ingresar correo y contraseña.")
@@ -386,12 +372,20 @@ class ReciGanaApp(tk.Tk):
         botones = tk.Frame(panel, bg=t["bg_panel"])
         botones.pack(pady=20)
         self._boton(botones, "INICIAR SESIÓN", iniciar_sesion, ancho=24).pack(pady=6)
-        self._boton(botones, "← Volver", self.mostrar_seleccion_login,
-                    color=t["texto_claro"], hover=t["texto"], ancho=24).pack(pady=6)
+
+        enlace_registro = tk.Label(panel, text="¿No tienes cuenta? Regístrate aquí",
+                                     font=("Segoe UI", 9, "underline"),
+                                     bg=t["bg_panel"], fg=t["secundario"], cursor="hand2")
+        enlace_registro.pack(pady=(10, 0))
+        enlace_registro.bind("<Button-1>", lambda e: self.mostrar_seleccion_registro())
 
         e_correo.focus_set()
         e_correo.bind("<Return>", lambda e: iniciar_sesion())
         e_pass.bind("<Return>", lambda e: iniciar_sesion())
+
+    def _alternar_modo_oscuro(self):
+        self.modo_oscuro = not self.modo_oscuro
+        self.mostrar_login_unificado()
 
     # ==============================================================
     # RECUPERAR / RESTABLECER CONTRASEÑA
@@ -443,12 +437,12 @@ class ReciGanaApp(tk.Tk):
                 datos.actualizar_contrasenia_reciclador(correo, nueva)
 
             messagebox.showinfo("¡Listo!", "Tu contraseña fue actualizada. Ya puedes iniciar sesión.")
-            self.mostrar_login(rol)
+            self.mostrar_login_unificado()
 
         botones = tk.Frame(panel, bg=t["bg_panel"])
         botones.pack(pady=20)
         self._boton(botones, "RESTABLECER CONTRASEÑA", restablecer, ancho=26).pack(pady=6)
-        self._boton(botones, "← Volver", lambda: self.mostrar_login(rol),
+        self._boton(botones, "← Volver", self.mostrar_login_unificado,
                     color=t["texto_claro"], hover=t["texto"], ancho=26).pack(pady=6)
 
     # ==============================================================
@@ -489,7 +483,7 @@ class ReciGanaApp(tk.Tk):
         tk.Button(menu, text=icono_tema, command=self._alternar_modo_oscuro_dashboard,
                   bg=t["bg_menu"], fg=t["primario"], relief="flat",
                   font=("Segoe UI", 9, "bold"), cursor="hand2").pack(side="bottom", pady=10)
-        tk.Button(menu, text="🚪 Cerrar sesión", command=self.mostrar_principal,
+        tk.Button(menu, text="🚪 Cerrar sesión", command=self.mostrar_login_unificado,
                   bg=t["error"], fg=t["blanco"], relief="flat",
                   font=FUENTE_BOTON, cursor="hand2", pady=8).pack(side="bottom", fill="x")
 
@@ -695,7 +689,7 @@ class ReciGanaApp(tk.Tk):
             tk.Button(botonera, text=f'💬 Chatear con {oferta_aceptada["reciclador_nombre"]}',
                       bg=t["secundario"], fg=t["blanco"], relief="flat", cursor="hand2",
                       font=("Segoe UI", 9, "bold"), padx=10, pady=4,
-                      command=lambda p=pub, o=oferta_aceptada: self._abrir_chat(p, o["reciclador_nombre"])
+                      command=lambda p=pub, o=oferta_aceptada: self.mostrar_chat(p, o["reciclador_nombre"])
                       ).pack(side="left", padx=(0, 8))
         if pub["estado"] != "vendido":
             tk.Button(botonera, text="📦 Marcar como vendido", bg=t["texto_claro"], fg=t["blanco"],
@@ -794,9 +788,19 @@ class ReciGanaApp(tk.Tk):
             tk.Label(tarjeta, text=pub["descripcion"], font=FUENTE_NORMAL,
                       bg=t["bg_panel"], fg=t["texto_claro"], wraplength=600, justify="left"
                       ).pack(anchor="w", pady=(5, 0))
+
         if pub.get("foto"):
-            tk.Label(tarjeta, text="📷 Tiene foto adjunta", font=("Segoe UI", 9, "italic"),
-                      bg=t["bg_panel"], fg=t["secundario"]).pack(anchor="w", pady=(3, 0))
+            try:
+                imagen = Image.open(pub["foto"])
+                imagen.thumbnail((220, 220))
+                foto_tk = ImageTk.PhotoImage(imagen)
+                etiqueta_foto = tk.Label(tarjeta, image=foto_tk, bg=t["bg_panel"])
+                etiqueta_foto.image = foto_tk  # se guarda la referencia, si no, la imagen desaparece
+                etiqueta_foto.pack(anchor="w", pady=(8, 4))
+            except Exception:
+                tk.Label(tarjeta, text="📷 Tiene foto adjunta (no se pudo cargar)",
+                          font=("Segoe UI", 9, "italic"), bg=t["bg_panel"], fg=t["secundario"]
+                          ).pack(anchor="w", pady=(3, 0))
 
         ya_ofertado = any(o["reciclador_correo"] == self.usuario_actual["correo"]
                            for o in pub["ofertas"])
@@ -866,11 +870,22 @@ class ReciGanaApp(tk.Tk):
                 tk.Label(tarjeta, text=f'Ciudadano: {pub["ciudadano_nombre"]}', font=FUENTE_NORMAL,
                           bg=t["bg_panel"], fg=t["texto_claro"]).pack(anchor="w", pady=(4, 0))
 
+                if pub.get("foto"):
+                    try:
+                        imagen = Image.open(pub["foto"])
+                        imagen.thumbnail((180, 180))
+                        foto_tk = ImageTk.PhotoImage(imagen)
+                        etiqueta_foto = tk.Label(tarjeta, image=foto_tk, bg=t["bg_panel"])
+                        etiqueta_foto.image = foto_tk
+                        etiqueta_foto.pack(anchor="w", pady=(6, 0))
+                    except Exception:
+                        pass
+
                 if oferta["estado"] == "aceptada":
                     tk.Button(tarjeta, text=f'💬 Chatear con {pub["ciudadano_nombre"]}',
                               bg=t["secundario"], fg=t["blanco"], relief="flat", cursor="hand2",
                               font=("Segoe UI", 9, "bold"), padx=10, pady=4,
-                              command=lambda p=pub: self._abrir_chat(p, p["ciudadano_nombre"])
+                              command=lambda p=pub: self.mostrar_chat(p, p["ciudadano_nombre"])
                               ).pack(anchor="w", pady=(8, 0))
 
         if not encontro_alguna:
@@ -905,40 +920,51 @@ class ReciGanaApp(tk.Tk):
 
     # ==============================================================
     # CHAT entre ciudadano y reciclador de una publicación
+    # CAMBIO: ya no es una ventana aparte (Toplevel). Ahora es una
+    # pantalla más dentro de la ventana principal, exactamente igual
+    # que "Publicar material" o "Mis publicaciones". Esto elimina los
+    # problemas de foco/teclado que daban las ventanas emergentes en
+    # Windows. Solo es accesible si ya iniciaste sesión, dando clic
+    # en el botón "💬 Chatear con..." de una publicación con oferta
+    # aceptada.
     # ==============================================================
-    def _abrir_chat(self, publicacion, nombre_otro):
+    def mostrar_chat(self, publicacion, nombre_otro):
+        self._limpiar()
         t = self.tema()
-        ventana = tk.Toplevel(self)
-        ventana.title(f'Chat — {publicacion["tipo_material"]} ({publicacion["peso_kg"]} kg)')
-        ventana.geometry("420x520")
-        ventana.configure(bg=t["bg_principal"])
+        fondo = tk.Frame(self.contenedor, bg=t["bg_principal"])
+        fondo.pack(fill="both", expand=True)
 
-        tk.Label(ventana, text=f'💬 Chat con {nombre_otro}', font=FUENTE_SECCION,
-                  bg=t["bg_principal"], fg=t["primario"]).pack(pady=(15, 5))
-        tk.Label(ventana, text=f'Sobre: {publicacion["tipo_material"]} — {publicacion["peso_kg"]} kg',
+        # A dónde regresa el botón "Volver", según el rol de quien está chateando
+        if self.rol_actual == "ciudadano":
+            volver = lambda: self.mostrar_dashboard_ciudadano("publicaciones")
+        else:
+            volver = lambda: self.mostrar_dashboard_reciclador("mis_ofertas")
+
+        barra_top = tk.Frame(fondo, bg=t["bg_principal"])
+        barra_top.pack(fill="x", padx=20, pady=(15, 0))
+        self._boton(barra_top, "← Volver", volver, color=t["texto_claro"],
+                    hover=t["texto"], ancho=14).pack(anchor="w")
+
+        tk.Label(fondo, text=f'💬 Chat con {nombre_otro}', font=FUENTE_SECCION,
+                  bg=t["bg_principal"], fg=t["primario"]).pack(pady=(10, 2))
+        tk.Label(fondo, text=f'Sobre: {publicacion["tipo_material"]} — {publicacion["peso_kg"]} kg',
                   font=("Segoe UI", 9), bg=t["bg_principal"], fg=t["texto_claro"]).pack(pady=(0, 10))
 
-        area_mensajes = tk.Text(ventana, bg=t["bg_panel"], fg=t["texto"], font=FUENTE_NORMAL,
-                                  wrap="word", relief="flat", state="disabled", padx=10, pady=10)
-        area_mensajes.pack(fill="both", expand=True, padx=15)
+        # CAMBIO CLAVE: el cuadro de escribir se empaca PRIMERO y anclado
+        # con side="bottom", para RESERVAR su espacio abajo del todo antes
+        # que la caja de mensajes. Así nunca se queda fuera de la ventana.
+        # Además se le da más padding y tamaño para que se vea grande y
+        # bien visible, no aplastado contra el borde inferior.
+        contenedor_envio = tk.Frame(fondo, bg=t["bg_principal"])
+        contenedor_envio.pack(side="bottom", fill="x", padx=30, pady=(10, 25))
 
-        def recargar_mensajes():
-            area_mensajes.config(state="normal")
-            area_mensajes.delete("1.0", "end")
-            mensajes = datos.obtener_mensajes(publicacion["id"])
-            if not mensajes:
-                area_mensajes.insert("end", "Todavía no hay mensajes. ¡Escribe el primero!\n")
-            for m in mensajes:
-                hora = m["hora"].split(" ")[1][:5]
-                area_mensajes.insert("end", f'[{hora}] {m["autor"]}: {m["texto"]}\n\n')
-            area_mensajes.config(state="disabled")
-            area_mensajes.see("end")
+        fila_envio = tk.Frame(contenedor_envio, bg=t["entrada_bg"], highlightthickness=1,
+                               highlightbackground=t["borde"])
+        fila_envio.pack(fill="x")
 
-        fila_envio = tk.Frame(ventana, bg=t["bg_principal"])
-        fila_envio.pack(fill="x", padx=15, pady=15)
-        entrada_mensaje = tk.Entry(fila_envio, font=FUENTE_NORMAL, bg=t["entrada_bg"],
-                                     fg=t["texto"], relief="solid", bd=1)
-        entrada_mensaje.pack(side="left", fill="x", expand=True, ipady=6, padx=(0, 8))
+        entrada_mensaje = tk.Entry(fila_envio, font=("Segoe UI", 13), bg=t["entrada_bg"],
+                                     fg=t["texto"], relief="flat", bd=0)
+        entrada_mensaje.pack(side="left", fill="x", expand=True, ipady=12, padx=(12, 8))
 
         nombre_propio = f'{self.usuario_actual["nombres"]} {self.usuario_actual["apellidos"]}'
 
@@ -952,7 +978,29 @@ class ReciGanaApp(tk.Tk):
 
         entrada_mensaje.bind("<Return>", enviar)
         tk.Button(fila_envio, text="Enviar ➤", command=enviar, bg=t["primario"], fg=t["blanco"],
-                  relief="flat", cursor="hand2", font=FUENTE_BOTON, padx=15).pack(side="left")
+                  relief="flat", cursor="hand2", font=("Segoe UI", 12, "bold"),
+                  padx=20, pady=10).pack(side="right", padx=6, pady=6)
+
+        # La caja de mensajes se empaca DESPUÉS: ocupa lo que sobra
+        # (ya con el cuadro de escribir asegurado abajo)
+        panel = tk.Frame(fondo, bg=t["bg_panel"], highlightbackground=t["borde"], highlightthickness=1)
+        panel.pack(fill="both", expand=True, padx=30, pady=(0, 10))
+
+        area_mensajes = tk.Text(panel, bg=t["bg_panel"], fg=t["texto"], font=FUENTE_NORMAL,
+                                  wrap="word", relief="flat", state="disabled", padx=10, pady=10)
+        area_mensajes.pack(fill="both", expand=True, padx=5, pady=5)
+
+        def recargar_mensajes():
+            area_mensajes.config(state="normal")
+            area_mensajes.delete("1.0", "end")
+            mensajes = datos.obtener_mensajes(publicacion["id"])
+            if not mensajes:
+                area_mensajes.insert("end", "Todavía no hay mensajes. ¡Escribe el primero!\n")
+            for m in mensajes:
+                hora = m["hora"].split(" ")[1][:5]
+                area_mensajes.insert("end", f'[{hora}] {m["autor"]}: {m["texto"]}\n\n')
+            area_mensajes.config(state="disabled")
+            area_mensajes.see("end")
 
         recargar_mensajes()
         entrada_mensaje.focus_set()
