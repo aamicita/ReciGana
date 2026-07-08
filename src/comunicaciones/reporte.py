@@ -87,7 +87,7 @@ class Reporte:
         self.__generado = True
 
         # Mostramos el encabezado del reporte
-        print(f"===== REPORTE DE {self.__tipo_reporte.upper()} =====")
+        print(f"===== REPORTE DE {self._tipo_reporte.upper()} =====")
         print(f"Fecha del período : {self._fecha}")
         print(f"Generado el       : {self.__fecha_generacion}")
         print("Datos:")
@@ -119,4 +119,4 @@ class Reporte:
     def __str__(self):
         # Representación legible del reporte cuando se imprime con print()
         estado = "Generado" if self.__generado else "Pendiente"
-        return f"Reporte #{self.__id_reporte} | Tipo: {self._tipo_reporte} | Fecha: {self._fecha} | Estado: {estado}"
+        return f"Reporte #{self._id_reporte} | Tipo: {self._tipo_reporte} | Fecha: {self._fecha} | Estado: {estado}"
