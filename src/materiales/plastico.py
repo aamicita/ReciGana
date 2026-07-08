@@ -31,7 +31,7 @@ class Plastico(MaterialBase):
         firma como en Java. Para lograr un efecto parecido, usamos un
         parámetro con valor por defecto:
             material.calcular_valor()      -> usa el precio base
-            material.calcular_valor(0.80)  -> usa el precio que le pases
+            material.calcular_valor(0.50)  -> usa el precio que le pases
         Las demás clases de material (Vidrio, Metal, Papel, Cartón,
         Orgánico) siguen exactamente este mismo patrón.
         """
