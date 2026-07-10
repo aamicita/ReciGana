@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-almacenamiento.py
 Se encarga de guardar y leer los datos de la aplicación.
 
 - Los USUARIOS (ciudadanos y recicladores) se guardan en formato CSV,
@@ -18,35 +17,7 @@ Se encarga de guardar y leer los datos de la aplicación.
     data/publicaciones.json   -> materiales publicados + sus ofertas
     data/mensajes.json        -> chats entre ciudadano y reciclador
     data/calificaciones.json  -> calificaciones que los ciudadanos
-                                  dejan a los recicladores
-
-No se necesita ninguna base de datos ni librería externa,
-todo funciona con los módulos "csv" y "json" que ya vienen
-incluidos en Python.
-
-NOVEDADES en esta versión (v4):
-  - obtener_publicaciones() ahora se "auto-corrige" cada vez que se
-    llama: si una publicación quedó guardada como "negociacion" pero
-    ya no tiene ninguna oferta ACEPTADA (por ejemplo, porque la única
-    oferta que tenía fue rechazada), se vuelve a poner "disponible"
-    automáticamente. Esto es lo que hace posible que un reciclador
-    rechazado pueda volver a ver el material y ofertar de nuevo, sin
-    importar si los datos ya existentes habían quedado "atascados"
-    de una versión anterior.
-  - Los mensajes del chat ahora tienen:
-      "id"           -> identificador único dentro de esa conversación
-      "autor_correo" -> correo de quien escribió el mensaje
-      "leido"        -> True/False, para mostrar el "visto" tipo WhatsApp
-    Esto permite:
-      * Marcar mensajes como leídos cuando el otro usuario abre el chat.
-      * Contar cuántos mensajes no leídos tiene un usuario (para
-        mostrar el avisito 🔴 en la interfaz).
-      * Borrar un mensaje puntual, pero SOLO si quien borra es el
-        mismo que lo escribió.
-
-(Se mantienen todas las funciones de versiones anteriores: dirección
-detallada del ciudadano, fotos de perfil, calificaciones, y el
-comprobante de recolección.)
+                            
 """
 
 import csv

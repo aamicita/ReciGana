@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 app_recigana.py
 ================
@@ -6,55 +5,6 @@ Interfaz gráfica de ReciGana hecha con Tkinter (viene incluido con Python,
 no requiere instalar nada más, EXCEPTO Pillow para poder mostrar las fotos
 de los materiales y de perfil -> pip install Pillow
 
-Cómo ejecutar:
-    python app_recigana.py
-
-Estructura de pantallas:
-    Login unificado (pantalla de inicio, elige rol con radiobuttons)
-      ├── Recuperar contraseña
-      ├── Registrarse
-      │     ├── Registro Ciudadano  -> al terminar, va a Login unificado
-      │     └── Registro Reciclador -> al terminar, va a Login unificado
-      ├── Dashboard Ciudadano   (una vez logueado)
-      │     ├── Publicar material
-      │     ├── Mis publicaciones
-      │     │     ├── Comprobante de recolección (cuando hay oferta aceptada)
-      │     │     └── Calificar al reciclador (cuando el material fue vendido)
-      │     ├── Mi perfil (foto + dirección detallada)
-      │     └── Chat (con un reciclador, sobre una publicación)
-      └── Dashboard Reciclador  (una vez logueado)
-            ├── Materiales disponibles
-            ├── Mis ofertas
-            │     └── Comprobante de recolección (cuando hay oferta aceptada)
-            ├── Mi perfil (foto + zona + calificación promedio)
-            └── Chat (con un ciudadano, sobre una publicación)
-
-NOVEDADES DE ESTA VERSIÓN (v4):
-  1) El estado de las publicaciones se auto-corrige solo (ver
-     almacenamiento.py): si un reciclador fue rechazado, el material
-     vuelve a "disponible" automáticamente y él (o cualquier otro)
-     puede volver a ofertar por el mismo material.
-  2) Aviso de mensajes nuevos 🔴, tipo WhatsApp:
-       - En el menú lateral, junto a "Mis publicaciones" / "Mis ofertas".
-       - En cada botón de Chat de cada tarjeta.
-       - En la tarjeta de estadísticas "Mensajes sin leer" del inicio.
-  3) El chat ahora se ve como una conversación real: cada mensaje es
-     una "burbuja" (los tuyos a la derecha, los del otro a la
-     izquierda), con hora y un check de "visto":
-       ✓   = enviado, todavía no lo han leído
-       ✓✓  = ya lo leyeron
-  4) Cada quien puede borrar sus propios mensajes (aparece un botoncito
-     🗑 solo en las burbujas que tú escribiste).
-  5) En "Mis ofertas" del reciclador ahora también se ve la foto de
-     perfil del ciudadano (antes solo se veía el nombre), igual que ya
-     pasaba del lado del ciudadano con la foto del reciclador.
-
-  (Se mantienen todas las novedades de versiones anteriores: reciclador
-  rechazado puede volver a ofertar, publicaciones visibles para todos
-  mientras no tengan oferta aceptada, foto de perfil del ciudadano
-  visible para el reciclador, tarjetas de estadísticas clickeables,
-  foto del material, sección "Mi perfil", calificaciones con estrellas,
-  comprobante de recolección y chats separados por publicación+reciclador.)
 
 Todos los datos se guardan en la carpeta 'data/' en archivos CSV/JSON
 separados por rol (ver almacenamiento.py).
