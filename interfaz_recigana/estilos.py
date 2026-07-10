@@ -6,7 +6,6 @@ Aquí se definen los colores del tema CLARO y del tema OSCURO.
 Cambiar colores desde un solo lugar hace que sea fácil
 mantener la app con un estilo consistente en todas las pantallas.
 """
-
 # ---------- TEMA CLARO (verde reciclaje, fresco y limpio) ----------
 TEMA_CLARO = {
     "bg_principal":   "#EAF7EC",   # Fondo general, verde muy clarito
@@ -23,8 +22,10 @@ TEMA_CLARO = {
     "exito":          "#2E7D32",   # Verde para mensajes de éxito
     "advertencia":    "#EF6C00",   # Naranja para advertencias/estados pendientes
     "blanco":         "#FFFFFF",
+    "estrella":       "#F9A825",   # Color de las estrellitas de calificación
+    "avatar_bg":      "#C8E6C9",   # Fondo del círculo cuando no hay foto de perfil
+    "notificacion":   "#E53935",   # NUEVO: color para el punto/aviso de mensaje nuevo
 }
-
 # ---------- TEMA OSCURO ----------
 TEMA_OSCURO = {
     "bg_principal":   "#121612",
@@ -41,6 +42,9 @@ TEMA_OSCURO = {
     "exito":          "#81C784",
     "advertencia":    "#FFB74D",
     "blanco":         "#FFFFFF",
+    "estrella":       "#FFCA28",
+    "avatar_bg":      "#2E3B2F",
+    "notificacion":   "#EF5350",   # NUEVO
 }
 
 FUENTE_TITULO   = ("Segoe UI", 26, "bold")
